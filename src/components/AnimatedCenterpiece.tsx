@@ -10,8 +10,8 @@ const AnimatedCenterpiece = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    canvas.width = 600;
-    canvas.height = 600;
+    canvas.width = 400;
+    canvas.height = 400;
 
     // Particle system
     class Particle {
@@ -55,7 +55,7 @@ const AnimatedCenterpiece = () => {
     }
 
     const particles: Particle[] = [];
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 50; i++) {
       particles.push(new Particle());
     }
 
@@ -95,7 +95,7 @@ const AnimatedCenterpiece = () => {
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
       const sides = 6;
-      const radius = 80 * pulseScale;
+      const radius = 60 * pulseScale;
 
       ctx.save();
       ctx.translate(centerX, centerY);
@@ -165,116 +165,30 @@ const AnimatedCenterpiece = () => {
   }, []);
 
   return (
-    <div className="relative flex items-center justify-center my-12">
-      {/* 3D Cube Container */}
-      <div className="relative animate-float" style={{ 
-        animation: "float 6s ease-in-out infinite",
-        perspective: "1000px"
-      }}>
-        {/* Animated 3D Cube */}
-        <div className="cube-container relative w-[300px] h-[300px]" style={{
-          transformStyle: "preserve-3d",
-          animation: "rotateCube 20s linear infinite"
-        }}>
-          <div className="cube-face cube-front"></div>
-          <div className="cube-face cube-back"></div>
-          <div className="cube-face cube-right"></div>
-          <div className="cube-face cube-left"></div>
-          <div className="cube-face cube-top"></div>
-          <div className="cube-face cube-bottom"></div>
-        </div>
-
-        {/* Canvas overlay for particles */}
+    <div className="relative flex items-center justify-center my-8">
+      <div className="relative" style={{ perspective: "1000px" }}>
+        {/* Canvas with particles and shapes */}
         <canvas
           ref={canvasRef}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+          className="relative pointer-events-none"
           style={{ mixBlendMode: "screen" }}
         />
-      </div>
-
-      {/* Orbital rings */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="orbital-ring orbital-ring-1"></div>
-        <div className="orbital-ring orbital-ring-2"></div>
-        <div className="orbital-ring orbital-ring-3"></div>
+        
+        {/* Subtle orbital rings */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="orbital-ring"></div>
+        </div>
       </div>
 
       <style>{`
-        @keyframes rotateCube {
-          0% { transform: rotateX(0deg) rotateY(0deg); }
-          100% { transform: rotateX(360deg) rotateY(360deg); }
-        }
-
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
-
-        @keyframes orbit {
-          from { transform: rotate(0deg) translateX(var(--orbit-radius)) rotate(0deg); }
-          to { transform: rotate(360deg) translateX(var(--orbit-radius)) rotate(-360deg); }
-        }
-
-        .cube-face {
-          position: absolute;
-          width: 150px;
-          height: 150px;
-          border: 2px solid hsl(var(--primary));
-          background: linear-gradient(135deg, 
-            hsl(var(--primary) / 0.1), 
-            hsl(var(--cyber-glow-secondary) / 0.1)
-          );
-          backdrop-filter: blur(10px);
-          box-shadow: 
-            inset 0 0 30px hsl(var(--primary) / 0.2),
-            0 0 30px hsl(var(--primary) / 0.3);
-        }
-
-        .cube-front { 
-          transform: translateZ(75px); 
-        }
-        .cube-back { 
-          transform: translateZ(-75px) rotateY(180deg); 
-        }
-        .cube-right { 
-          transform: rotateY(90deg) translateZ(75px); 
-        }
-        .cube-left { 
-          transform: rotateY(-90deg) translateZ(75px); 
-        }
-        .cube-top { 
-          transform: rotateX(90deg) translateZ(75px); 
-        }
-        .cube-bottom { 
-          transform: rotateX(-90deg) translateZ(75px); 
-        }
-
         .orbital-ring {
           position: absolute;
-          border: 2px solid hsl(var(--primary) / 0.3);
+          width: 300px;
+          height: 300px;
+          border: 1px solid hsl(var(--primary) / 0.15);
           border-radius: 50%;
-          box-shadow: 0 0 20px hsl(var(--primary) / 0.2);
-        }
-
-        .orbital-ring-1 {
-          width: 400px;
-          height: 400px;
-          animation: spin 10s linear infinite;
           border-style: dashed;
-        }
-
-        .orbital-ring-2 {
-          width: 500px;
-          height: 500px;
-          animation: spin 15s linear infinite reverse;
-          border-color: hsl(var(--cyber-glow-secondary) / 0.3);
-        }
-
-        .orbital-ring-3 {
-          width: 600px;
-          height: 600px;
           animation: spin 20s linear infinite;
-          border-style: dotted;
         }
 
         @keyframes spin {
