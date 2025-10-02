@@ -1,199 +1,113 @@
-import { useEffect, useRef } from "react";
+import { Shield, Lock, Eye, Terminal } from "lucide-react";
 
 const AnimatedCenterpiece = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    canvas.width = 400;
-    canvas.height = 400;
-
-    // Particle system
-    class Particle {
-      x: number;
-      y: number;
-      size: number;
-      speedX: number;
-      speedY: number;
-      color: string;
-      opacity: number;
-
-      constructor() {
-        this.x = Math.random() * canvas!.width;
-        this.y = Math.random() * canvas!.height;
-        this.size = Math.random() * 3 + 1;
-        this.speedX = Math.random() * 0.5 - 0.25;
-        this.speedY = Math.random() * 0.5 - 0.25;
-        this.color = Math.random() > 0.5 ? "#22d3ee" : "#a78bfa";
-        this.opacity = Math.random() * 0.5 + 0.3;
-      }
-
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-
-        if (this.x > canvas!.width) this.x = 0;
-        if (this.x < 0) this.x = canvas!.width;
-        if (this.y > canvas!.height) this.y = 0;
-        if (this.y < 0) this.y = canvas!.height;
-      }
-
-      draw() {
-        if (!ctx) return;
-        ctx.fillStyle = this.color;
-        ctx.globalAlpha = this.opacity;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = 1;
-      }
-    }
-
-    const particles: Particle[] = [];
-    for (let i = 0; i < 50; i++) {
-      particles.push(new Particle());
-    }
-
-    let angle = 0;
-    let pulseScale = 1;
-    let pulseDirection = 1;
-
-    const animate = () => {
-      ctx.fillStyle = "rgba(20, 23, 30, 0.1)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Update particles
-      particles.forEach((particle) => {
-        particle.update();
-        particle.draw();
-      });
-
-      // Draw connecting lines
-      particles.forEach((particleA, indexA) => {
-        particles.slice(indexA + 1).forEach((particleB) => {
-          const dx = particleA.x - particleB.x;
-          const dy = particleA.y - particleB.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < 100) {
-            ctx.strokeStyle = `rgba(34, 211, 238, ${0.2 * (1 - distance / 100)})`;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(particleA.x, particleA.y);
-            ctx.lineTo(particleB.x, particleB.y);
-            ctx.stroke();
-          }
-        });
-      });
-
-      // Central rotating hexagon
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-      const sides = 6;
-      const radius = 60 * pulseScale;
-
-      ctx.save();
-      ctx.translate(centerX, centerY);
-      ctx.rotate(angle);
-
-      // Outer glow hexagon
-      ctx.strokeStyle = "#22d3ee";
-      ctx.lineWidth = 3;
-      ctx.shadowBlur = 20;
-      ctx.shadowColor = "#22d3ee";
-      ctx.beginPath();
-      for (let i = 0; i <= sides; i++) {
-        const angle = (i * 2 * Math.PI) / sides;
-        const x = radius * Math.cos(angle);
-        const y = radius * Math.sin(angle);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.closePath();
-      ctx.stroke();
-
-      // Inner hexagon
-      const innerRadius = radius * 0.7;
-      ctx.strokeStyle = "#a78bfa";
-      ctx.shadowColor = "#a78bfa";
-      ctx.beginPath();
-      for (let i = 0; i <= sides; i++) {
-        const angle = (i * 2 * Math.PI) / sides - Math.PI / 6;
-        const x = innerRadius * Math.cos(angle);
-        const y = innerRadius * Math.sin(angle);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.closePath();
-      ctx.stroke();
-
-      // Spinning triangles
-      for (let i = 0; i < 3; i++) {
-        ctx.save();
-        ctx.rotate((angle * 2 + (i * Math.PI * 2) / 3));
-        ctx.translate(radius * 1.5, 0);
-        ctx.fillStyle = "#22d3ee";
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = "#22d3ee";
-        ctx.beginPath();
-        ctx.moveTo(0, -10);
-        ctx.lineTo(8, 10);
-        ctx.lineTo(-8, 10);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-      }
-
-      ctx.restore();
-
-      // Update animation values
-      angle += 0.01;
-      pulseScale += 0.005 * pulseDirection;
-      if (pulseScale > 1.2 || pulseScale < 0.9) {
-        pulseDirection *= -1;
-      }
-
-      requestAnimationFrame(animate);
-    };
-
-    animate();
-  }, []);
-
   return (
-    <div className="relative flex items-center justify-center my-8">
-      <div className="relative" style={{ perspective: "1000px" }}>
-        {/* Canvas with particles and shapes */}
-        <canvas
-          ref={canvasRef}
-          className="relative pointer-events-none"
-          style={{ mixBlendMode: "screen" }}
-        />
-        
-        {/* Subtle orbital rings */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="orbital-ring"></div>
+    <div className="relative w-full max-w-4xl mx-auto py-12">
+      {/* Network Grid Background */}
+      <div className="absolute inset-0 overflow-hidden opacity-20">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `
+            linear-gradient(hsl(var(--primary) / 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, hsl(var(--primary) / 0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '30px 30px'
+        }}></div>
+      </div>
+
+      <div className="relative grid md:grid-cols-3 gap-8 items-center">
+        {/* Left Node */}
+        <div className="flex flex-col items-center gap-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <div className="relative group">
+            <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500"></div>
+            <div className="relative bg-card border-2 border-primary/50 rounded-full p-6 card-glow">
+              <Lock className="w-8 h-8 text-primary animate-pulse-glow" />
+            </div>
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-mono text-primary">ENCRYPTION</p>
+            <div className="flex gap-1 justify-center mt-2">
+              <div className="w-1 h-1 bg-primary rounded-full animate-pulse"></div>
+              <div className="w-1 h-1 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-1 h-1 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Center Shield - Main Feature */}
+        <div className="flex flex-col items-center gap-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+          <div className="relative">
+            {/* Pulsing rings */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-40 h-40 border-2 border-primary/30 rounded-full animate-ping" style={{ animationDuration: '3s' }}></div>
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-32 h-32 border border-primary/20 rounded-full animate-ping" style={{ animationDuration: '2s', animationDelay: '0.5s' }}></div>
+            </div>
+            
+            {/* Main shield */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-primary/30 rounded-2xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
+              <div className="relative bg-gradient-to-br from-card to-secondary border-2 border-primary rounded-2xl p-8 card-glow">
+                <Shield className="w-16 h-16 text-primary glow-text" strokeWidth={1.5} />
+                
+                {/* Scanning line effect */}
+                <div className="absolute inset-0 overflow-hidden rounded-2xl">
+                  <div className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent animate-scan"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-mono text-primary font-bold">SECURE</p>
+            <p className="text-xs text-muted-foreground mt-1">Protected Network</p>
+          </div>
+        </div>
+
+        {/* Right Node */}
+        <div className="flex flex-col items-center gap-4 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+          <div className="relative group">
+            <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500"></div>
+            <div className="relative bg-card border-2 border-primary/50 rounded-full p-6 card-glow">
+              <Eye className="w-8 h-8 text-primary animate-pulse-glow" />
+            </div>
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-mono text-primary">MONITORING</p>
+            <div className="flex gap-1 justify-center mt-2">
+              <div className="w-1 h-1 bg-primary rounded-full animate-pulse"></div>
+              <div className="w-1 h-1 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-1 h-1 bg-primary rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <style>{`
-        .orbital-ring {
-          position: absolute;
-          width: 300px;
-          height: 300px;
-          border: 1px solid hsl(var(--primary) / 0.15);
-          border-radius: 50%;
-          border-style: dashed;
-          animation: spin 20s linear infinite;
-        }
+      {/* Connection lines */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: -1 }}>
+        <line x1="25%" y1="50%" x2="50%" y2="50%" stroke="hsl(var(--primary))" strokeWidth="2" strokeDasharray="5,5" opacity="0.3">
+          <animate attributeName="stroke-dashoffset" from="0" to="10" dur="1s" repeatCount="indefinite" />
+        </line>
+        <line x1="50%" y1="50%" x2="75%" y2="50%" stroke="hsl(var(--primary))" strokeWidth="2" strokeDasharray="5,5" opacity="0.3">
+          <animate attributeName="stroke-dashoffset" from="0" to="10" dur="1s" repeatCount="indefinite" />
+        </line>
+      </svg>
 
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+      {/* Bottom terminal indicator */}
+      <div className="mt-8 flex items-center justify-center gap-2 text-xs font-mono text-muted-foreground animate-fade-in" style={{ animationDelay: '0.8s' }}>
+        <Terminal className="w-4 h-4 text-primary" />
+        <span>system.status:</span>
+        <span className="text-primary">OPERATIONAL</span>
+        <span className="inline-block w-2 h-2 bg-primary rounded-full animate-pulse-glow ml-2"></span>
+      </div>
+
+      <style>{`
+        @keyframes scan {
+          0% { transform: translateY(-100%); }
+          100% { transform: translateY(400%); }
+        }
+        
+        .animate-scan {
+          animation: scan 3s ease-in-out infinite;
         }
       `}</style>
     </div>
