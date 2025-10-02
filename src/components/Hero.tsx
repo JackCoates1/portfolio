@@ -1,6 +1,7 @@
 import { Github, Linkedin, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-cyber.jpg";
+import AnimatedCenterpiece from "./AnimatedCenterpiece";
 
 const Hero = () => {
   return (
@@ -23,7 +24,11 @@ const Hero = () => {
           <h1 className="text-5xl md:text-7xl font-bold mb-6 text-gradient">
             Cyber Security Student
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          
+          {/* Crazy Center Animation */}
+          <AnimatedCenterpiece />
+          
+          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto mt-8">
             Passionate about protecting digital assets and building secure systems
           </p>
           <div className="flex gap-4 justify-center items-center flex-wrap">
