@@ -16,8 +16,7 @@ const About = () => {
               with a fascination for understanding how systems work and how to protect them.
             </p>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Currently pursuing my degree while actively participating in CTF competitions 
-              and building hands-on projects that demonstrate real-world security implementations.
+              Currently pursuing my degree while building hands-on projects that demonstrate real-world security implementations.
             </p>
           </div>
 
