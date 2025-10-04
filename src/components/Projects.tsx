@@ -6,32 +6,16 @@ import { Badge } from "@/components/ui/badge";
 const Projects = () => {
   const projects = [
     {
-      title: "Network Intrusion Detection System",
-      description: "Built a Python-based IDS that monitors network traffic and detects anomalies using machine learning algorithms.",
-      tags: ["Python", "Scikit-learn", "Wireshark", "Machine Learning"],
-      github: "#",
-      demo: "#"
+      title: "Insecurity Multi-Tool",
+      description: "Modular Python toolkit for cybersecurity, automation, and account management—authorized use only.",
+      tags: ["Python", "Cybersecurity", "Automation", "Security Tools"],
+      github: "https://github.com/shexty/Insecurity-multi-tool",
     },
     {
-      title: "Password Strength Analyzer",
-      description: "Web application that evaluates password strength and provides recommendations based on NIST guidelines.",
-      tags: ["JavaScript", "React", "Cryptography", "NIST"],
-      github: "#",
-      demo: "#"
-    },
-    {
-      title: "CTF Challenge Platform",
-      description: "Created a capture-the-flag platform for students to practice cybersecurity skills with various challenges.",
-      tags: ["Docker", "Node.js", "SQL", "Web Security"],
-      github: "#",
-      demo: "#"
-    },
-    {
-      title: "Vulnerability Scanner",
-      description: "Automated tool for scanning web applications and identifying common security vulnerabilities like XSS and SQL injection.",
-      tags: ["Python", "OWASP", "Selenium", "Penetration Testing"],
-      github: "#",
-      demo: "#"
+      title: "DDOS Notifications",
+      description: "Lightweight Python tool for real-time DDoS detection. Instantly alerts via Discord, Slack, or Teams when suspicious traffic spikes occur.",
+      tags: ["Python", "DDoS Detection", "Network Security", "Monitoring"],
+      github: "https://github.com/shexty/DDOS-Notifications",
     }
   ];
 
@@ -65,13 +49,11 @@ const Projects = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex gap-3">
-                <Button variant="outline" size="sm" className="flex-1">
-                  <Github className="mr-2 h-4 w-4" />
-                  Code
-                </Button>
-                <Button size="sm" className="flex-1">
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Demo
+                <Button variant="outline" size="sm" className="flex-1" asChild>
+                  <a href={project.github} target="_blank" rel="noopener noreferrer">
+                    <Github className="mr-2 h-4 w-4" />
+                    View Code
+                  </a>
                 </Button>
               </CardFooter>
             </Card>

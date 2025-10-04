@@ -1,4 +1,4 @@
-import { Mail, Linkedin, Github, FileText } from "lucide-react";
+import { Mail, Linkedin, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Contact = () => {
@@ -13,7 +13,7 @@ const Contact = () => {
           or just having a chat about the latest security trends.
         </p>
 
-        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
           <Button 
             variant="outline" 
             className="h-auto py-6 flex flex-col items-center gap-3 card-glow"
@@ -45,14 +45,6 @@ const Contact = () => {
               <Github className="h-8 w-8 text-primary" />
               <span className="text-sm">GitHub</span>
             </a>
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            className="h-auto py-6 flex flex-col items-center gap-3 card-glow"
-          >
-            <FileText className="h-8 w-8 text-primary" />
-            <span className="text-sm">Resume</span>
           </Button>
         </div>
       </div>
