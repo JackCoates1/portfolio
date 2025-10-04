@@ -4,15 +4,11 @@ const Skills = () => {
   const skillCategories = [
     {
       title: "Security Tools",
-      skills: ["Wireshark", "Metasploit", "Burp Suite", "Nmap", "John the Ripper", "Kali Linux"]
+      skills: ["Wireshark", "Metasploit", "Nmap", "Kali Linux"]
     },
     {
       title: "Programming",
-      skills: ["Python", "Bash", "JavaScript", "SQL", "PowerShell"]
-    },
-    {
-      title: "Frameworks & Standards",
-      skills: ["OWASP", "NIST", "ISO 27001", "MITRE ATT&CK"]
+      skills: ["Python", "Bash", "Powershell"]
     },
     {
       title: "Specializations",
