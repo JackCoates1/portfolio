@@ -32,17 +32,23 @@ const Hero = () => {
             Passionate about protecting digital assets and building secure systems
           </p>
           <div className="flex gap-4 justify-center items-center flex-wrap">
-            <Button size="lg" className="group">
-              <Mail className="mr-2 h-5 w-5 group-hover:animate-pulse-glow" />
-              Get In Touch
+            <Button size="lg" className="group" asChild>
+              <a href="mailto:Coatesjack06@gmail.com">
+                <Mail className="mr-2 h-5 w-5 group-hover:animate-pulse-glow" />
+                Get In Touch
+              </a>
             </Button>
-            <Button variant="outline" size="lg" className="group">
-              <Github className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
-              GitHub
+            <Button variant="outline" size="lg" className="group" asChild>
+              <a href="https://github.com/shexty" target="_blank" rel="noopener noreferrer">
+                <Github className="mr-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
+                GitHub
+              </a>
             </Button>
-            <Button variant="outline" size="lg" className="group">
-              <Linkedin className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
-              LinkedIn
+            <Button variant="outline" size="lg" className="group" asChild>
+              <a href="https://uk.linkedin.com/in/jack-coates" target="_blank" rel="noopener noreferrer">
+                <Linkedin className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                LinkedIn
+              </a>
             </Button>
           </div>
         </div>

@@ -17,25 +17,34 @@ const Contact = () => {
           <Button 
             variant="outline" 
             className="h-auto py-6 flex flex-col items-center gap-3 card-glow"
+            asChild
           >
-            <Mail className="h-8 w-8 text-primary" />
-            <span className="text-sm">Email</span>
+            <a href="mailto:Coatesjack06@gmail.com">
+              <Mail className="h-8 w-8 text-primary" />
+              <span className="text-sm">Email</span>
+            </a>
           </Button>
           
           <Button 
             variant="outline" 
             className="h-auto py-6 flex flex-col items-center gap-3 card-glow"
+            asChild
           >
-            <Linkedin className="h-8 w-8 text-primary" />
-            <span className="text-sm">LinkedIn</span>
+            <a href="https://uk.linkedin.com/in/jack-coates" target="_blank" rel="noopener noreferrer">
+              <Linkedin className="h-8 w-8 text-primary" />
+              <span className="text-sm">LinkedIn</span>
+            </a>
           </Button>
           
           <Button 
             variant="outline" 
             className="h-auto py-6 flex flex-col items-center gap-3 card-glow"
+            asChild
           >
-            <Github className="h-8 w-8 text-primary" />
-            <span className="text-sm">GitHub</span>
+            <a href="https://github.com/shexty" target="_blank" rel="noopener noreferrer">
+              <Github className="h-8 w-8 text-primary" />
+              <span className="text-sm">GitHub</span>
+            </a>
           </Button>
           
           <Button 
