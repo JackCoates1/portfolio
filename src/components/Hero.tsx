@@ -22,7 +22,7 @@ const Hero = () => {
       <div className="container mx-auto px-4 z-10 text-center">
         <div className="animate-fade-in">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 text-gradient">
-            Cyber Security Student
+            Jack Coates
           </h1>
           
           {/* Crazy Center Animation */}
