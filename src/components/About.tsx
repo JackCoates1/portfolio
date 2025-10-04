@@ -58,7 +58,7 @@ const About = () => {
                 <div>
                   <h3 className="font-semibold text-lg mb-2">Technical Skills</h3>
                   <p className="text-muted-foreground">
-                    Python, Linux, Wireshark, Metasploit, Burp Suite
+                    Python, Linux, Bash
                   </p>
                 </div>
               </div>
