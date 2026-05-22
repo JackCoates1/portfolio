@@ -26,13 +26,14 @@ jobs:
         run: npm run build
 
       - name: Deploy via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        uses: appleboy/scp-action@v0.1.7
         with:
-          server: ${{ secrets.FTP_HOST }}
+          host: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
-          local_path: ./dist/*
-          remote_path: /jackcoatesfiles/
-          sftp_only: true
-          delete_remote_files: false
+          port: 22
+          source: "dist/*"
+          target: "/jackcoatesfiles"
+          strip_components: 1
+          rm: false
 
