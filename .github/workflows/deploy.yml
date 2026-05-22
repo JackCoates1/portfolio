@@ -39,7 +39,7 @@ jobs:
             set net:timeout 10;
             set net:max-retries 3;
             open -u $FTP_USER,$FTP_PASS sftp://$FTP_HOST;
-            mirror -R --delete --verbose dist/ /jackcoatesfiles/;
+            mirror -R --verbose dist/ ./;
             quit
           "
 
