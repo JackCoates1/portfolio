@@ -3,16 +3,20 @@ import { Badge } from "@/components/ui/badge";
 const Skills = () => {
   const skillCategories = [
     {
-      title: "Security Tools",
-      skills: ["Wireshark", "Metasploit", "Nmap", "Kali Linux"]
+      title: "Security",
+      skills: ["Wireshark", "Metasploit", "Nmap", "Kali Linux", "Pen Testing", "DDoS Mitigation", "Network Security", "Cryptography"]
     },
     {
-      title: "Programming",
-      skills: ["Python", "Bash", "Powershell"]
+      title: "Development",
+      skills: ["Python", "Node.js", "Express", "React", "TypeScript", "Bash", "PowerShell", "EJS"]
     },
     {
-      title: "Specializations",
-      skills: ["Penetration Testing", "Network Security", "Web Security", "Cryptography", "Incident Response", "Threat Intelligence"]
+      title: "Infrastructure",
+      skills: ["Linux", "Docker", "Proxmox", "k3s", "nginx", "Cloudflare", "ArgoCD", "PM2"]
+    },
+    {
+      title: "Tools & Services",
+      skills: ["Git", "Stripe", "Tailwind CSS", "Vite", "Brevo", "Telegram API", "SSH", "Certbot"]
     }
   ];
 
@@ -53,3 +57,4 @@ const Skills = () => {
 };
 
 export default Skills;
+
