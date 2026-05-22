@@ -6,17 +6,47 @@ import { Badge } from "@/components/ui/badge";
 const Projects = () => {
   const projects = [
     {
-      title: "Insecurity Multi-Tool",
-      description: "Modular Python toolkit for cybersecurity, automation, and account management—authorized use only.",
-      tags: ["Python", "Cybersecurity", "Automation", "Security Tools"],
-      github: "https://github.com/shexty/Insecurity-multi-tool",
+      title: "MaxsReviews",
+      description: "Full-stack e-commerce site for digital review products. Node/Express backend, Stripe payments, Brevo email, subscriber management, and a full admin panel.",
+      tags: ["Node.js", "Express", "Stripe", "EJS"],
+      github: null,
+      live: "https://maxsreviews.co.uk",
     },
     {
-      title: "DDOS Notifications",
-      description: "Lightweight Python tool for real-time DDoS detection. Instantly alerts via Discord, Slack, or Teams when suspicious traffic spikes occur.",
-      tags: ["Python", "DDoS Detection", "Network Security", "Monitoring"],
-      github: "https://github.com/shexty/DDOS-Notifications",
-    }
+      title: "Radiant Aesthetics Clinic",
+      description: "Booking and management system for an aesthetics clinic. React frontend, Express API, Telegram alerts for bookings, contact handling, and automated daily digests.",
+      tags: ["React", "Express", "nginx", "Automation"],
+      github: null,
+      live: "https://theaestheticsclinic.shop",
+    },
+    {
+      title: "AI DDoS Firewall",
+      description: "Python firewall that detects and blocks DDoS attacks in real time using rate limiting and IP reputation. Sends instant Telegram/Discord alerts when an attack is caught.",
+      tags: ["Python", "Security", "Networking", "Automation"],
+      github: "https://github.com/JackCoates1/AI-DDOS-Firewall",
+      live: null,
+    },
+    {
+      title: "Insecurity Multi-Tool",
+      description: "Pen testing toolkit for recon and vulnerability scanning. Covers port scanning, subdomain enumeration, service fingerprinting, and more.",
+      tags: ["Python", "Pen Testing", "Recon", "Security"],
+      github: "https://github.com/JackCoates1/Insecurity-multi-tool",
+      live: null,
+    },
+    {
+      title: "daddylive-m3u",
+      description: "Aggregates and maintains up-to-date M3U playlists for IPTV. Auto-refreshes stream URLs, removes dead links, and formats output for use in media players.",
+      tags: ["Python", "Automation", "IPTV"],
+      github: "https://github.com/JackCoates1/daddylive-m3u",
+      live: null,
+    },
+    {
+      title: "Homelab Infrastructure",
+      description: "Proxmox cluster running k3s, ArgoCD, and Docker. Cloudflare tunnels, VPS failover, and a full watchdog setup so things stay up whether I am around or not.",
+      tags: ["Proxmox", "k3s", "Docker", "ArgoCD"],
+      github: null,
+      live: null,
+    },
   ];
 
   return (
@@ -26,11 +56,11 @@ const Projects = () => {
           Featured <span className="text-gradient">Projects</span>
         </h2>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project, index) => (
             <Card 
               key={project.title}
-              className="bg-card border-border card-glow animate-fade-in-up overflow-hidden"
+              className="bg-card border-border card-glow animate-fade-in-up overflow-hidden flex flex-col"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <CardHeader>
@@ -39,7 +69,7 @@ const Projects = () => {
                   {project.description}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1">
                 <div className="flex flex-wrap gap-2">
                   {project.tags.map((tag) => (
                     <Badge key={tag} variant="outline" className="border-primary/30">
@@ -49,12 +79,25 @@ const Projects = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex gap-3">
-                <Button variant="outline" size="sm" className="flex-1" asChild>
-                  <a href={project.github} target="_blank" rel="noopener noreferrer">
-                    <Github className="mr-2 h-4 w-4" />
-                    View Code
-                  </a>
-                </Button>
+                {project.github && (
+                  <Button variant="outline" size="sm" className="flex-1" asChild>
+                    <a href={project.github} target="_blank" rel="noopener noreferrer">
+                      <Github className="mr-2 h-4 w-4" />
+                      Code
+                    </a>
+                  </Button>
+                )}
+                {project.live && (
+                  <Button variant="outline" size="sm" className="flex-1" asChild>
+                    <a href={project.live} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      Live
+                    </a>
+                  </Button>
+                )}
+                {!project.github && !project.live && (
+                  <span className="text-muted-foreground text-sm">Private / Internal</span>
+                )}
               </CardFooter>
             </Card>
           ))}
@@ -65,3 +108,4 @@ const Projects = () => {
 };
 
 export default Projects;
+
