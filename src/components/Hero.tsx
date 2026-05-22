@@ -5,8 +5,8 @@ import AnimatedCenterpiece from "./AnimatedCenterpiece";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <div 
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-14">
+      <div
         className="absolute inset-0 z-0"
         style={{
           backgroundImage: `url(${heroImage})`,
@@ -22,9 +22,9 @@ const Hero = () => {
           <h1 className="text-5xl md:text-7xl font-bold mb-6 text-gradient">
             Jack Coates
           </h1>
-          
+
           <AnimatedCenterpiece />
-          
+
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto mt-8">
             Developer and cyber security enthusiast. I build production web apps, security tools, and run a homelab that probably does too much.
           </p>
@@ -61,4 +61,3 @@ const Hero = () => {
 };
 
 export default Hero;
-
