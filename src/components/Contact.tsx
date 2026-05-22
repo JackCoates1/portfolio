@@ -9,39 +9,24 @@ const Contact = () => {
           Let's <span className="text-gradient">Connect</span>
         </h2>
         <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
-          I'm always open to discussing cybersecurity projects, collaboration opportunities, 
-          or just having a chat about the latest security trends.
+          Always open to interesting projects, collaboration, or just a chat about security and infrastructure.
         </p>
 
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-          <Button 
-            variant="outline" 
-            className="h-auto py-6 flex flex-col items-center gap-3 card-glow"
-            asChild
-          >
-            <a href="mailto:Coatesjack06@gmail.com">
+        <div className="grid sm:grid-cols-3 gap-4 max-w-lg mx-auto">
+          <Button variant="outline" className="h-auto py-6 flex flex-col items-center gap-3 card-glow" asChild>
+            <a href="mailto:coatesjack06@gmail.com">
               <Mail className="h-8 w-8 text-primary" />
               <span className="text-sm">Email</span>
             </a>
           </Button>
-          
-          <Button 
-            variant="outline" 
-            className="h-auto py-6 flex flex-col items-center gap-3 card-glow"
-            asChild
-          >
+          <Button variant="outline" className="h-auto py-6 flex flex-col items-center gap-3 card-glow" asChild>
             <a href="https://uk.linkedin.com/in/jack-coates" target="_blank" rel="noopener noreferrer">
               <Linkedin className="h-8 w-8 text-primary" />
               <span className="text-sm">LinkedIn</span>
             </a>
           </Button>
-          
-          <Button 
-            variant="outline" 
-            className="h-auto py-6 flex flex-col items-center gap-3 card-glow"
-            asChild
-          >
-            <a href="https://github.com/shexty" target="_blank" rel="noopener noreferrer">
+          <Button variant="outline" className="h-auto py-6 flex flex-col items-center gap-3 card-glow" asChild>
+            <a href="https://github.com/JackCoates1" target="_blank" rel="noopener noreferrer">
               <Github className="h-8 w-8 text-primary" />
               <span className="text-sm">GitHub</span>
             </a>
