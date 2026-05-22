@@ -25,13 +25,14 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
-          local-dir: ./dist/
-          server-dir: /jackcoatesfiles/
-          dangerous-clean-slate: false
+          local_path: ./dist/*
+          remote_path: /jackcoatesfiles/
+          sftp_only: true
+          delete_remote_files: false
 
