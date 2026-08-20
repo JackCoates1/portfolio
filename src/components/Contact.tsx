@@ -20,7 +20,7 @@ const Contact = () => {
             </a>
           </Button>
           <Button variant="outline" className="h-auto py-6 flex flex-col items-center gap-3 card-glow" asChild>
-            <a href="https://uk.linkedin.com/in/jack-coates" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.linkedin.com/in/jack-coates-a8a430310" target="_blank" rel="noopener noreferrer">
               <Linkedin className="h-8 w-8 text-primary" />
               <span className="text-sm">LinkedIn</span>
             </a>

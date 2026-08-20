@@ -42,7 +42,7 @@ const Hero = () => {
               </a>
             </Button>
             <Button variant="outline" size="lg" className="group" asChild>
-              <a href="https://uk.linkedin.com/in/jack-coates" target="_blank" rel="noopener noreferrer">
+              <a href="https://www.linkedin.com/in/jack-coates-a8a430310" target="_blank" rel="noopener noreferrer">
                 <Linkedin className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
                 LinkedIn
               </a>
