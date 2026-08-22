@@ -15,8 +15,8 @@ import {
 
 // --- Data-collection helpers -------------------------------------------------
 // Everything here reads information the browser already exposes to any site
-// you visit — nothing is transmitted anywhere except the one IP-geolocation
-// lookup (a public, keyless API, over HTTPS). The point of this page is to
+// you visit — nothing is transmitted anywhere except a couple of small IP
+// lookups (public, keyless APIs, over HTTPS). The point of this page is to
 // make that normally-invisible exposure visible.
 
 interface GeoInfo {
@@ -27,6 +27,53 @@ interface GeoInfo {
   org?: string;
   timezone?: string;
 }
+
+const fetchWithTimeout = (url: string, ms: number) => {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), ms);
+  return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(id));
+};
+
+// ipapi.co's free tier occasionally rate-limits or times out — fall back to a
+// second keyless provider so a single flaky lookup doesn't blank the whole card.
+const fetchGeo = async (): Promise<GeoInfo> => {
+  try {
+    const res = await fetchWithTimeout("https://ipapi.co/json/", 5000);
+    if (!res.ok) throw new Error("primary geo lookup failed");
+    const data = await res.json();
+    if (data.error) throw new Error("primary geo lookup errored");
+    return data;
+  } catch {
+    const res = await fetchWithTimeout("https://ipwho.is/", 5000);
+    if (!res.ok) throw new Error("fallback geo lookup failed");
+    const data = await res.json();
+    if (!data.success) throw new Error("fallback geo lookup errored");
+    return {
+      ip: data.ip,
+      city: data.city,
+      region: data.region,
+      country_name: data.country,
+      org: data.connection?.isp,
+      timezone: data.timezone?.id,
+    };
+  }
+};
+
+// Many mobile/ISP connections are IPv6-only or dual-stack, so a single "public
+// IP" lookup can silently return an IPv6 address with no IPv4 in sight. Query
+// the IPv4-only and IPv6-only endpoints separately so both (or "not on this
+// network") are always shown explicitly instead of one address looking like
+// a missing field.
+const fetchStackIp = async (version: 4 | 6): Promise<string | null> => {
+  try {
+    const res = await fetchWithTimeout(`https://api${version}.ipify.org?format=json`, 3000);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.ip ?? null;
+  } catch {
+    return null;
+  }
+};
 
 const parseUserAgent = (ua: string) => {
   const browser =
@@ -112,35 +159,77 @@ const getCanvasFingerprint = (): string => {
 const StatRow = ({ label, value }: { label: string; value: React.ReactNode }) => (
   <div className="flex items-center justify-between gap-4 py-2 border-b border-border/50 last:border-0">
     <span className="text-sm text-muted-foreground font-mono">{label}</span>
-    <span className="text-sm font-mono text-right break-all">{value}</span>
+    <span className="text-sm font-mono text-right break-all text-foreground">{value}</span>
   </div>
+);
+
+const SectionCard = ({
+  icon: Icon,
+  title,
+  children,
+}: {
+  icon: React.ElementType;
+  title: string;
+  children: React.ReactNode;
+}) => (
+  <Card className="group relative border-primary/20 bg-card/40 backdrop-blur-sm overflow-hidden transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.35)]">
+    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+    <CardHeader className="pb-3">
+      <CardTitle className="flex items-center gap-2 text-base font-mono">
+        <Icon className="w-4 h-4 text-primary" />
+        {title}
+      </CardTitle>
+    </CardHeader>
+    <CardContent>{children}</CardContent>
+  </Card>
 );
 
 const CyberLab = () => {
   const [geo, setGeo] = useState<GeoInfo | null>(null);
   const [geoError, setGeoError] = useState(false);
+  const [geoAttempt, setGeoAttempt] = useState(0);
+  const [ipv4, setIpv4] = useState<string | null | undefined>(undefined);
+  const [ipv6, setIpv6] = useState<string | null | undefined>(undefined);
   const [webrtcIps, setWebrtcIps] = useState<string[] | null>(null);
   const [canvasHash] = useState(() => getCanvasFingerprint());
+  const [typed, setTyped] = useState(false);
   const startTime = useRef(performance.now());
 
   useEffect(() => {
-    fetch("https://ipapi.co/json/")
-      .then((res) => {
-        if (!res.ok) throw new Error("lookup failed");
-        return res.json();
-      })
-      .then((data) => setGeo(data))
+    const t = setTimeout(() => setTyped(true), 300);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    setGeo(null);
+    setGeoError(false);
+
+    fetchGeo()
+      .then(setGeo)
       .catch(() => setGeoError(true));
 
+    fetchStackIp(4).then(setIpv4);
+    fetchStackIp(6).then(setIpv6);
     getWebRTCLeak().then(setWebrtcIps);
-  }, []);
+  }, [geoAttempt]);
 
   const ua = navigator.userAgent;
   const { browser, os, deviceType } = parseUserAgent(ua);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-6 py-10 max-w-4xl">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Ambient background: subtle scanning grid + glow, hacker-terminal feel */}
+      <div
+        className="pointer-events-none fixed inset-0 opacity-[0.07]"
+        style={{
+          backgroundImage:
+            "linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)",
+          backgroundSize: "48px 48px",
+        }}
+      />
+      <div className="pointer-events-none fixed -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/10 blur-[120px]" />
+
+      <div className="container mx-auto px-6 py-10 max-w-4xl relative">
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors font-mono mb-8"
@@ -150,117 +239,117 @@ const CyberLab = () => {
         </Link>
 
         <div className="mb-10">
-          <div className="flex items-center gap-3 mb-3">
-            <Fingerprint className="w-8 h-8 text-primary" />
-            <h1 className="text-3xl md:text-4xl font-bold font-mono tracking-tight">Cyber Lab</h1>
-            <Badge variant="outline" className="border-primary/40 text-primary font-mono text-xs">
-              live demo
+          <div className="flex items-center gap-3 mb-3 flex-wrap">
+            <div className="relative">
+              <Fingerprint className="w-9 h-9 text-primary" />
+              <span className="absolute inset-0 animate-ping rounded-full bg-primary/20" />
+            </div>
+            <h1 className="text-3xl md:text-5xl font-bold font-mono tracking-tight bg-gradient-to-r from-primary via-primary to-primary/60 bg-clip-text text-transparent">
+              Cyber Lab
+            </h1>
+            <Badge variant="outline" className="border-primary/40 text-primary font-mono text-xs animate-pulse">
+              ● live demo
             </Badge>
           </div>
-          <p className="text-muted-foreground max-w-2xl leading-relaxed">
+          <p className="text-muted-foreground max-w-2xl leading-relaxed font-mono text-sm">
+            <span className="text-primary">$</span>{" "}
+            {typed ? (
+              "whoami --verbose"
+            ) : (
+              <span className="opacity-0">whoami --verbose</span>
+            )}
+          </p>
+          <p className="text-muted-foreground max-w-2xl leading-relaxed mt-2">
             Every site you visit can read some or all of what's shown below, usually silently.
             This page collects it openly instead — everything here comes straight from your own
-            browser, plus one IP-geolocation lookup, so you can see exactly what a typical
+            browser, plus a couple of IP lookups, so you can see exactly what a typical
             fingerprinting or analytics script has access to.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border-border bg-card/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base font-mono">
-                <Globe className="w-4 h-4 text-primary" />
-                Network &amp; Location
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {geoError ? (
-                <p className="text-sm text-muted-foreground">Lookup unavailable right now.</p>
-              ) : !geo ? (
-                <div className="space-y-3">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              ) : (
-                <>
-                  <StatRow label="Public IP" value={geo.ip} />
-                  <StatRow label="City" value={geo.city || "Unknown"} />
-                  <StatRow label="Region" value={geo.region || "Unknown"} />
-                  <StatRow label="Country" value={geo.country_name || "Unknown"} />
-                  <StatRow label="ISP / Org" value={geo.org || "Unknown"} />
-                  <StatRow label="Timezone" value={geo.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone} />
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="border-border bg-card/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base font-mono">
-                <MonitorSmartphone className="w-4 h-4 text-primary" />
-                Browser &amp; Device
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <StatRow label="Browser" value={browser} />
-              <StatRow label="Operating System" value={os} />
-              <StatRow label="Device Type" value={deviceType} />
-              <StatRow label="Platform" value={navigator.platform || "n/a"} />
-              <StatRow label="Language" value={navigator.language} />
-              <StatRow label="CPU Cores" value={navigator.hardwareConcurrency ?? "n/a"} />
-            </CardContent>
-          </Card>
-
-          <Card className="border-border bg-card/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base font-mono">
-                <MonitorSmartphone className="w-4 h-4 text-primary" />
-                Screen &amp; Viewport
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <StatRow label="Screen Resolution" value={`${window.screen.width} × ${window.screen.height}`} />
-              <StatRow label="Viewport Size" value={`${window.innerWidth} × ${window.innerHeight}`} />
-              <StatRow label="Color Depth" value={`${window.screen.colorDepth}-bit`} />
-              <StatRow label="Pixel Ratio" value={window.devicePixelRatio} />
-              <StatRow label="Touch Support" value={navigator.maxTouchPoints > 0 ? "Yes" : "No"} />
-            </CardContent>
-          </Card>
-
-          <Card className="border-border bg-card/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base font-mono">
-                <Wifi className="w-4 h-4 text-primary" />
-                WebRTC Leak Test
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {webrtcIps === null ? (
-                <div className="space-y-3">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-2/3" />
-                </div>
-              ) : webrtcIps.length === 0 ? (
+          <SectionCard icon={Globe} title="Network & Location">
+            {geoError ? (
+              <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  No local network addresses leaked via WebRTC — your browser or network
-                  configuration is blocking this.
+                  Geolocation lookup unavailable right now (provider rate-limited or unreachable
+                  from this network).
                 </p>
-              ) : (
-                <>
-                  <p className="text-xs text-muted-foreground mb-2">
-                    Your local network address{webrtcIps.length > 1 ? "es" : ""}, revealed via
-                    WebRTC even if you're behind a VPN:
-                  </p>
-                  {webrtcIps.map((ip) => (
-                    <StatRow key={ip} label="Local IP" value={ip} />
-                  ))}
-                </>
-              )}
-            </CardContent>
-          </Card>
+                <button
+                  onClick={() => setGeoAttempt((n) => n + 1)}
+                  className="text-xs font-mono text-primary hover:underline"
+                >
+                  retry lookup →
+                </button>
+              </div>
+            ) : !geo ? (
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            ) : (
+              <>
+                <StatRow
+                  label="IPv4"
+                  value={ipv4 === undefined ? <Skeleton className="h-4 w-24 inline-block" /> : ipv4 ?? "Not on this network"}
+                />
+                <StatRow
+                  label="IPv6"
+                  value={ipv6 === undefined ? <Skeleton className="h-4 w-24 inline-block" /> : ipv6 ?? "Not on this network"}
+                />
+                <StatRow label="City" value={geo.city || "Unknown"} />
+                <StatRow label="Region" value={geo.region || "Unknown"} />
+                <StatRow label="Country" value={geo.country_name || "Unknown"} />
+                <StatRow label="ISP / Org" value={geo.org || "Unknown"} />
+                <StatRow label="Timezone" value={geo.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone} />
+              </>
+            )}
+          </SectionCard>
 
-          <Card className="border-border bg-card/50 md:col-span-2">
+          <SectionCard icon={MonitorSmartphone} title="Browser & Device">
+            <StatRow label="Browser" value={browser} />
+            <StatRow label="Operating System" value={os} />
+            <StatRow label="Device Type" value={deviceType} />
+            <StatRow label="Platform" value={navigator.platform || "n/a"} />
+            <StatRow label="Language" value={navigator.language} />
+            <StatRow label="CPU Cores" value={navigator.hardwareConcurrency ?? "n/a"} />
+          </SectionCard>
+
+          <SectionCard icon={MonitorSmartphone} title="Screen & Viewport">
+            <StatRow label="Screen Resolution" value={`${window.screen.width} × ${window.screen.height}`} />
+            <StatRow label="Viewport Size" value={`${window.innerWidth} × ${window.innerHeight}`} />
+            <StatRow label="Color Depth" value={`${window.screen.colorDepth}-bit`} />
+            <StatRow label="Pixel Ratio" value={window.devicePixelRatio} />
+            <StatRow label="Touch Support" value={navigator.maxTouchPoints > 0 ? "Yes" : "No"} />
+          </SectionCard>
+
+          <SectionCard icon={Wifi} title="WebRTC Leak Test">
+            {webrtcIps === null ? (
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+            ) : webrtcIps.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No local network addresses leaked via WebRTC — your browser or network
+                configuration is blocking this.
+              </p>
+            ) : (
+              <>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Your local network address{webrtcIps.length > 1 ? "es" : ""}, revealed via
+                  WebRTC even if you're behind a VPN:
+                </p>
+                {webrtcIps.map((ip) => (
+                  <StatRow key={ip} label="Local IP" value={ip} />
+                ))}
+              </>
+            )}
+          </SectionCard>
+
+          <Card className="md:col-span-2 relative border-primary/20 bg-card/40 backdrop-blur-sm overflow-hidden transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.35)]">
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base font-mono">
                 <Fingerprint className="w-4 h-4 text-primary" />
@@ -275,7 +364,7 @@ const CyberLab = () => {
               </p>
               <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3">
                 <Fingerprint className="w-5 h-5 text-primary shrink-0" />
-                <code className="text-primary font-mono text-sm tracking-wider">{canvasHash}</code>
+                <code className="text-primary font-mono text-base tracking-[0.2em]">{canvasHash}</code>
               </div>
             </CardContent>
           </Card>
@@ -296,8 +385,8 @@ const CyberLab = () => {
                 </p>
                 <p className="text-xs text-muted-foreground mt-3 font-mono flex items-center gap-2">
                   <Network className="w-3.5 h-3.5" />
-                  Nothing on this page is stored or sent anywhere beyond the one geolocation
-                  lookup — view source if you don't believe me.
+                  Nothing on this page is stored or sent anywhere beyond a couple of IP lookups —
+                  view source if you don't believe me.
                 </p>
               </div>
             </div>
