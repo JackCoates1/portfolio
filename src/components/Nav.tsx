@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 
 const navLinks = [
@@ -8,11 +9,14 @@ const navLinks = [
   { label: "Projects", href: "#projects" },
   { label: "Timeline", href: "#timeline" },
   { label: "Contact", href: "#contact" },
+  { label: "Cyber Lab", href: "/cyberlab" },
 ];
 
 const Nav = () => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -22,6 +26,17 @@ const Nav = () => {
 
   const handleClick = (href: string) => {
     setOpen(false);
+
+    if (href.startsWith("/")) {
+      navigate(href);
+      return;
+    }
+
+    if (location.pathname !== "/") {
+      navigate("/" + href);
+      return;
+    }
+
     const el = document.querySelector(href);
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
