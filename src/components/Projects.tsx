@@ -17,7 +17,7 @@ const Projects = () => {
       description: "Booking and management system for an aesthetics clinic. React frontend, Express API, Telegram alerts for bookings, contact handling, and automated daily digests.",
       tags: ["React", "Express", "nginx", "Automation"],
       github: null,
-      live: "https://theaestheticsclinic.shop",
+      live: "https://oliveaestheticsclinic.com",
     },
     {
       title: "AI DDoS Firewall",
