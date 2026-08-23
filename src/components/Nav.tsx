@@ -7,6 +7,7 @@ const navLinks = [
   { label: "About", href: "#about" },
   { label: "Skills", href: "#skills" },
   { label: "Projects", href: "#projects" },
+  { label: "Security", href: "#security" },
   { label: "Timeline", href: "#timeline" },
   { label: "Contact", href: "#contact" },
   { label: "Cyber Lab", href: "/cyberlab" },

@@ -2,28 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here.
 All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    --background: 220 26% 6%;
+    --background: 220 28% 4%;
     --foreground: 200 20% 96%;
 
-    --card: 220 24% 8%;
+    --card: 220 24% 6%;
     --card-foreground: 200 20% 96%;
 
-    --popover: 220 24% 8%;
+    --popover: 220 24% 6%;
     --popover-foreground: 200 20% 96%;
 
     --primary: 189 94% 55%;
     --primary-foreground: 220 26% 6%;
 
-    --secondary: 220 18% 14%;
+    --secondary: 220 18% 12%;
     --secondary-foreground: 200 20% 96%;
 
-    --muted: 220 18% 14%;
+    --muted: 220 18% 12%;
     --muted-foreground: 200 10% 60%;
 
     --accent: 189 94% 55%;
@@ -32,8 +32,8 @@ All colors MUST be HSL.
     --destructive: 0 84% 60%;
     --destructive-foreground: 200 20% 96%;
 
-    --border: 220 18% 18%;
-    --input: 220 18% 18%;
+    --border: 220 16% 16%;
+    --input: 220 16% 16%;
     --ring: 189 94% 55%;
 
     --radius: 0.5rem;
@@ -42,11 +42,18 @@ All colors MUST be HSL.
     --cyber-glow: 189 94% 55%;
     --cyber-glow-secondary: 270 80% 60%;
     --grid-pattern: 220 18% 12%;
-    
+
+    /* Status semantics — used for live/security data only, not decoration.
+       Keep this the ONLY place color carries meaning outside the base theme. */
+    --status-info: 189 94% 55%;      /* live / informational — same as primary */
+    --status-blocked: 270 80% 65%;   /* mitigated / blocked by CrowdSec */
+    --status-warning: 38 92% 58%;
+    --status-critical: 0 84% 60%;    /* same as destructive */
+
     /* Gradients */
     --gradient-cyber: linear-gradient(135deg, hsl(189 94% 55% / 0.1) 0%, hsl(270 80% 60% / 0.1) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(220 24% 10%) 0%, hsl(220 24% 8%) 100%);
-    
+    --gradient-card: linear-gradient(180deg, hsl(220 24% 7%) 0%, hsl(220 24% 6%) 100%);
+
     /* Shadows */
     --shadow-glow: 0 0 30px hsl(189 94% 55% / 0.3);
     --shadow-card: 0 8px 32px hsl(220 26% 2% / 0.5);
@@ -68,17 +75,30 @@ All colors MUST be HSL.
   .text-gradient {
     @apply bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent;
   }
-  
+
   .glow-text {
     text-shadow: 0 0 20px hsl(var(--cyber-glow) / 0.5);
   }
-  
+
   .card-glow {
     box-shadow: 0 0 20px hsl(var(--cyber-glow) / 0.1);
     transition: box-shadow 0.3s ease;
   }
-  
+
   .card-glow:hover {
     box-shadow: 0 0 30px hsl(var(--cyber-glow) / 0.2);
+  }
+
+  /* Data typography — used across the security dashboard so figures never
+     jitter as they tick, and stay visually distinct from prose. */
+  .font-data {
+    font-family: ui-monospace, "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Section eyebrow label — uppercase mono micro-label, the one recurring
+     detail that ties the dashboard's terminal-adjacent panels together. */
+  .label-micro {
+    @apply font-data text-[10px] uppercase tracking-[0.12em] text-muted-foreground;
   }
 }
