@@ -42,8 +42,8 @@ const Projects = () => {
     },
     {
       title: "Homelab Infrastructure",
-      description: "Proxmox cluster running k3s, ArgoCD, and Docker. Cloudflare tunnels, VPS failover, and a full watchdog setup so things stay up whether I am around or not.",
-      tags: ["Proxmox", "k3s", "Docker", "ArgoCD"],
+      description: "A physical Proxmox rack (mini PCs + Raspberry Pis) running k3s, ArgoCD, and Docker, plus a VPS that hosts this site and my other production apps. Cloudflare-fronted, with CrowdSec watching real traffic and blocking attacks at the firewall — the live feed above is that system, not a demo.",
+      tags: ["Proxmox", "k3s", "CrowdSec", "Cloudflare"],
       github: null,
       live: null,
     },
