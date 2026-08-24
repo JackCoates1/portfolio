@@ -3,10 +3,8 @@ import { History, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Shape of the `notable_replay` object in /security-stats.json. It is a single
-// real, historical alert CrowdSec caught and blocked on this server — never
-// fabricated client-side. The field itself can be null when no qualifying
-// alert has been captured yet.
+// notable_replay from /security-stats.json — one real alert CrowdSec blocked
+// on this server, never fabricated client-side. Null until one qualifies.
 export interface NotableReplay {
   alert_id: number;
   timestamp: string;
@@ -169,9 +167,8 @@ const AttackReplay = ({ replay }: AttackReplayProps) => {
     return "hsl(var(--muted-foreground))";
   };
 
-  // Purely client-side: no requests are fired. Re-clicking mid-run simply
-  // clears the pending timers and restarts the sequence, so there is no
-  // cooldown and no rate-limit to manage.
+  // no requests fired — just clears pending timers and restarts, so no
+  // cooldown or rate-limit to worry about
   const startReplay = () => {
     timersRef.current.forEach((id) => window.clearTimeout(id));
     timersRef.current = [];

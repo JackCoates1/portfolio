@@ -6,16 +6,9 @@ import type {
 } from "react";
 import { Terminal, X } from "lucide-react";
 
-/*
- * Hidden terminal easter egg.
- *
- * Open with the backtick key (`) or the low-opacity `~` pinned to the
- * bottom-right corner of the homepage. Close with Escape, the `exit`
- * command, or the × button.
- *
- * Everything it prints is real content already shown on the site — nothing
- * here invents employment history or credentials.
- */
+// Hidden terminal — opens with backtick or the `~` pinned bottom-right,
+// closes with Esc, `exit`, or the ×. Everything it prints is real site
+// content; nothing here invents history or credentials.
 
 type LineTone = "default" | "muted" | "error";
 

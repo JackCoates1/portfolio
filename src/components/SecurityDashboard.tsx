@@ -41,8 +41,7 @@ const STATUS_COLORS = ["blocked", "info", "warning", "critical"] as const;
 const scenarioColor = (index: number) =>
   `hsl(var(--status-${STATUS_COLORS[index % STATUS_COLORS.length]}))`;
 
-// Axis ticks: day + hour, since the window spans several days and
-// hour-only labels repeat every 24 points and read as scrambled.
+// window spans days, so hour-only ticks would repeat every 24 and look scrambled
 const formatHour = (iso: string) => {
   const d = new Date(iso);
   const day = d.toLocaleDateString(undefined, { weekday: "short" });
@@ -50,7 +49,7 @@ const formatHour = (iso: string) => {
   return `${day} ${hour}`;
 };
 
-// Tooltip gets the fuller date, axis ticks stay short.
+// tooltip gets the full date, ticks stay short
 const formatHourFull = (iso: string) => {
   const d = new Date(iso);
   return d.toLocaleString(undefined, {

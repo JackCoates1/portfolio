@@ -6,6 +6,13 @@ import { Badge } from "@/components/ui/badge";
 const Projects = () => {
   const projects = [
     {
+      title: "This Portfolio",
+      description: "The site you're looking at. React/Vite SPA with a live CrowdSec security dashboard fed by real traffic, a replay of an actual blocked attack, and GPG-signed, build-attested deploys.",
+      tags: ["React", "TypeScript", "Vite", "CrowdSec"],
+      github: "https://github.com/JackCoates1/portfolio",
+      live: "https://jackcoates.co.uk",
+    },
+    {
       title: "MaxsReviews",
       description: "Full-stack e-commerce site for digital review products. Node/Express backend, Stripe payments, Brevo email, subscriber management, and a full admin panel.",
       tags: ["Node.js", "Express", "Stripe", "EJS"],
