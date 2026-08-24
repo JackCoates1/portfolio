@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Shield, ShieldAlert, Globe2, Activity, Radio } from "lucide-react";
+import AttackReplayDemo from "@/components/AttackReplayDemo";
 import {
   AreaChart,
   Area,
@@ -268,6 +269,8 @@ const SecurityDashboard = () => {
             <span>refreshes every 60s</span>
           </div>
         </div>
+
+        <AttackReplayDemo />
       </div>
     </section>
   );

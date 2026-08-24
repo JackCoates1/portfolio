@@ -1,22 +1,10 @@
 import { Github, Linkedin, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroImage from "@/assets/hero-cyber.jpg";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden pt-14">
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: `url(${heroImage})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="absolute inset-0 bg-background/90" />
-      </div>
-
-      <div className="container mx-auto px-4 z-10 text-center max-w-2xl">
+    <section className="min-h-[85vh] flex items-center justify-center pt-14">
+      <div className="container mx-auto px-4 text-center max-w-2xl">
         <h1 className="text-4xl md:text-6xl font-bold mb-4 text-foreground">
           Jack Coates
         </h1>
