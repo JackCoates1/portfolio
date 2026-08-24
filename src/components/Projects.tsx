@@ -28,15 +28,8 @@ const Projects = () => {
     },
     {
       title: "Insecurity Multi-Tool",
-      description: "Pen testing toolkit for recon and vulnerability scanning. Covers port scanning, subdomain enumeration, service fingerprinting, and more.",
+      description: "Pen testing toolkit for recon and vulnerability scanning. Covers port scanning, subdomain enumeration, service fingerprinting, and more. Private repo.",
       tags: ["Python", "Pen Testing", "Recon", "Security"],
-      github: null,
-      live: null,
-    },
-    {
-      title: "daddylive-m3u",
-      description: "Aggregates and maintains up-to-date M3U playlists for IPTV. Auto-refreshes stream URLs, removes dead links, and formats output for use in media players.",
-      tags: ["Python", "Automation", "IPTV"],
       github: null,
       live: null,
     },
