@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Shield, ShieldAlert, Globe2, Activity, Radio } from "lucide-react";
-import AttackReplayDemo from "@/components/AttackReplayDemo";
+import AttackReplay, { type NotableReplay } from "@/components/AttackReplay";
 import {
   AreaChart,
   Area,
@@ -33,6 +33,7 @@ interface SecurityStats {
   by_scenario: ScenarioCount[];
   by_country: CountryCount[];
   timeline: TimelinePoint[];
+  notable_replay: NotableReplay | null;
 }
 
 const STATUS_COLORS = ["blocked", "info", "warning", "critical"] as const;
@@ -270,7 +271,7 @@ const SecurityDashboard = () => {
           </div>
         </div>
 
-        <AttackReplayDemo />
+        {stats && <AttackReplay replay={stats.notable_replay} />}
       </div>
     </section>
   );
