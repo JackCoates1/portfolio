@@ -88,23 +88,26 @@ const VerifiedStatus = () => {
   const sev = status?.dependency_alerts.by_severity;
 
   return (
-    <section className="px-4 pb-20">
-      <div className="container mx-auto max-w-6xl">
-        <div className="bg-card border border-border rounded-lg overflow-hidden card-glow">
-          <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-border">
-            <BadgeCheck className="h-3.5 w-3.5 text-primary" />
-            <span className="label-micro">Verified</span>
-            <span className="font-data text-[10px] text-muted-foreground">
-              trust signals for the repo behind this site
-            </span>
-            <span className="ml-auto font-data text-[10px] text-muted-foreground">
-              {error
-                ? "OFFLINE"
-                : status
-                  ? `SYNCED ${timeAgo(status.generated_at)}`
-                  : "CONNECTING…"}
-            </span>
-          </div>
+    <div className="mt-6 bg-card border border-border rounded-lg overflow-hidden card-glow">
+      <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-border">
+        <BadgeCheck className="h-3.5 w-3.5 text-primary" />
+        <span className="label-micro">Verified</span>
+        <span className="font-data text-[10px] text-muted-foreground">
+          trust signals for the repo behind this site
+        </span>
+        <span className="ml-auto font-data text-[10px] text-muted-foreground">
+          {error
+            ? "OFFLINE"
+            : status
+              ? `SYNCED ${timeAgo(status.generated_at)}`
+              : "CONNECTING…"}
+        </span>
+      </div>
+
+      <p className="px-4 pt-3 text-xs text-muted-foreground max-w-3xl">
+        Proof the code running this site is actually what's in the repo, and
+        hasn't been swapped or tampered with between commit and deploy.
+      </p>
 
           <div className="grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border">
             {/* latest commit */}
@@ -269,9 +272,7 @@ const VerifiedStatus = () => {
             )}
             <ExternalLink className="h-3 w-3 ml-auto" />
           </a>
-        </div>
-      </div>
-    </section>
+    </div>
   );
 };
 

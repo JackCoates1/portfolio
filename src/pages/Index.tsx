@@ -4,7 +4,6 @@ import About from "@/components/About";
 import Skills from "@/components/Skills";
 import Projects from "@/components/Projects";
 import SecurityDashboard from "@/components/SecurityDashboard";
-import VerifiedStatus from "@/components/VerifiedStatus";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import TerminalEasterEgg from "@/components/TerminalEasterEgg";
@@ -20,7 +19,6 @@ const Index = () => {
       <Skills />
       <Projects />
       <SecurityDashboard />
-      <VerifiedStatus />
       <Contact />
       <Footer />
       <TerminalEasterEgg />

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Shield, ShieldAlert, Globe2, Activity, Radio } from "lucide-react";
 import AttackReplay, { type NotableReplay } from "@/components/AttackReplay";
+import VerifiedStatus from "@/components/VerifiedStatus";
 import {
   AreaChart,
   Area,
@@ -271,6 +272,7 @@ const SecurityDashboard = () => {
         </div>
 
         {stats && <AttackReplay replay={stats.notable_replay} />}
+        <VerifiedStatus />
       </div>
     </section>
   );
