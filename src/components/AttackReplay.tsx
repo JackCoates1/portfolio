@@ -44,8 +44,8 @@ interface StageDefinition {
   rows: StageRow[];
 }
 
-// ~1s per stage — enough to read each step without dragging.
-const STAGE_MS = 1000;
+// ~2.4s per stage — slow enough to actually read a 6-row stage like "Request".
+const STAGE_MS = 2400;
 
 const STATUS_TOKEN: Record<StageAccent, string> = {
   info: "hsl(var(--status-info))",
@@ -196,20 +196,19 @@ const AttackReplay = ({ replay }: AttackReplayProps) => {
 
   return (
     <div className="mt-6 bg-card border border-border rounded-lg card-glow overflow-hidden">
-      <div className="p-6">
-        <div className="flex items-center gap-2 mb-3">
+      <div className="p-4">
+        <div className="flex items-center gap-2 mb-2">
           <History className="h-3.5 w-3.5 text-primary" />
           <span className="label-micro">Notable Attack Replay</span>
         </div>
 
-        <p className="font-data text-[11px] text-muted-foreground mb-3">
+        <p className="font-data text-[11px] text-muted-foreground mb-2">
           CAPTURED {formatCapturedAt(replay.timestamp)} · ALERT #{replay.alert_id}
         </p>
 
-        <p className="text-sm text-muted-foreground mb-4 max-w-3xl">
-          A real request CrowdSec caught and blocked on this server, replayed from
-          the captured data. This is a client-side animation of an already-resolved
-          event — no requests are sent.
+        <p className="text-xs text-muted-foreground mb-3 max-w-3xl">
+          A real request CrowdSec caught and blocked on this server, replayed
+          client-side from the captured data — no requests are sent.
         </p>
 
         <Button onClick={startReplay} variant="outline" size="sm">
@@ -217,7 +216,7 @@ const AttackReplay = ({ replay }: AttackReplayProps) => {
           Replay this attack
         </Button>
 
-        <ol className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+        <ol className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-1.5">
           {stages.map((stage, index) => {
             const state = stepState(index);
             return (
@@ -248,17 +247,17 @@ const AttackReplay = ({ replay }: AttackReplayProps) => {
           })}
         </ol>
 
-        <div className="mt-4 min-h-[260px]" aria-live="polite">
+        <div className="mt-3 min-h-[120px]" aria-live="polite">
           {currentStage === null ? (
-            <p className="text-sm text-muted-foreground font-data">
+            <p className="text-xs text-muted-foreground font-data">
               Press “Replay this attack” to step through the sequence.
             </p>
           ) : (
             <div
               key={activeStage}
-              className="animate-fade-in-up rounded-md border border-border bg-secondary/20 p-4"
+              className="animate-fade-in-up rounded-md border border-border bg-secondary/20 p-3"
             >
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-2">
                 <span
                   className="label-micro"
                   style={{ color: STATUS_TOKEN[currentStage.accent] }}
@@ -273,9 +272,9 @@ const AttackReplay = ({ replay }: AttackReplayProps) => {
                 )}
               </div>
 
-              <p className="text-sm text-muted-foreground mb-3">{currentStage.note}</p>
+              <p className="text-xs text-muted-foreground mb-2">{currentStage.note}</p>
 
-              <dl className="space-y-2">
+              <dl className="space-y-1.5">
                 {currentStage.rows.map((row) => (
                   <div key={row.label} className="flex items-baseline gap-3">
                     <dt className="font-data text-[10px] uppercase tracking-wider text-muted-foreground w-24 sm:w-36 shrink-0">
