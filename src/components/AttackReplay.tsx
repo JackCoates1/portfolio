@@ -64,7 +64,7 @@ const formatCapturedAt = (iso: string): string => {
   if (Number.isNaN(d.getTime())) return iso;
   const hh = String(d.getUTCHours()).padStart(2, "0");
   const mm = String(d.getUTCMinutes()).padStart(2, "0");
-  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()} · ${hh}:${mm} UTC`;
+  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()} · ${hh}:${mm} GMT`;
 };
 
 const buildStages = (replay: NotableReplay): StageDefinition[] => [

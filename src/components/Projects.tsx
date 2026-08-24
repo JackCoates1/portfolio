@@ -31,7 +31,7 @@ const Projects = () => {
       description: "Pen testing toolkit for recon and vulnerability scanning. Covers port scanning, subdomain enumeration, service fingerprinting, and more. Private repo.",
       tags: ["Python", "Pen Testing", "Recon", "Security"],
       github: null,
-      live: null,
+      live: "https://web.whop.com/insecurity-ships/exp_EHYo1MBwGigTZP/app/",
     },
     {
       title: "Homelab Infrastructure",
