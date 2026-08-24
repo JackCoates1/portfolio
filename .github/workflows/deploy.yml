@@ -63,4 +63,4 @@ jobs:
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           echo "$VPS_HOST ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIARd0kanGEURbQpP7RkBU4e5eZZKR5QNF8pDInyqM6fW" >> ~/.ssh/known_hosts
-          rsync -az --delete -e "ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts" --exclude=security-stats.json dist/ $VPS_USER@$VPS_HOST:$VPS_DEPLOY_PATH/
+          rsync -az --delete -e "ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts" --exclude=security-stats.json --exclude=verified-status.json dist/ $VPS_USER@$VPS_HOST:$VPS_DEPLOY_PATH/
