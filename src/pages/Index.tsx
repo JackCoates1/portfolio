@@ -6,6 +6,7 @@ import Projects from "@/components/Projects";
 import SecurityDashboard from "@/components/SecurityDashboard";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+import TerminalEasterEgg from "@/components/TerminalEasterEgg";
 
 const Index = () => {
   return (
@@ -20,6 +21,7 @@ const Index = () => {
       <SecurityDashboard />
       <Contact />
       <Footer />
+      <TerminalEasterEgg />
     </div>
   );
 };

@@ -1,0 +1,65 @@
+{
+  "name": "Jack Coates",
+  "location": "Bradford, UK",
+  "summary": "Developer and cyber security student. I build production web apps, security tools, and run a homelab that probably does too much.",
+  "bio": "I am a cyber security student based in Bradford, UK. Alongside studying I build real things — full-stack web apps, security tools, and infrastructure that actually runs in production.\n\nI run a Proxmox homelab with a k3s cluster, keep production sites live on a VPS, and automate anything that can be automated. If something can be made more secure or more reliable, I will poke at it until it is.",
+  "education": "Bachelor's in Cyber Security",
+  "specialties": {
+    "security": [
+      "Penetration Testing",
+      "Network Security",
+      "Incident Response",
+      "DDoS Mitigation"
+    ]
+  },
+  "skills": {
+    "security": [
+      "Wireshark",
+      "Metasploit",
+      "Nmap",
+      "Kali Linux",
+      "Pen Testing",
+      "DDoS Mitigation",
+      "Network Security",
+      "Cryptography"
+    ],
+    "development": [
+      "Python",
+      "Node.js",
+      "Express",
+      "React",
+      "TypeScript",
+      "Bash",
+      "PowerShell",
+      "EJS"
+    ],
+    "infrastructure": [
+      "Linux",
+      "Docker",
+      "Proxmox",
+      "k3s",
+      "nginx",
+      "Cloudflare",
+      "ArgoCD",
+      "PM2"
+    ],
+    "tools": [
+      "Git",
+      "Stripe",
+      "Tailwind CSS",
+      "Vite",
+      "Brevo",
+      "Telegram API",
+      "SSH",
+      "Certbot"
+    ]
+  },
+  "contact": {
+    "email": "coatesjack06@gmail.com"
+  },
+  "links": {
+    "github": "https://github.com/JackCoates1",
+    "linkedin": "https://www.linkedin.com/in/jack-coates-a8a430310",
+    "portfolio": "https://jackcoates.co.uk"
+  }
+}
