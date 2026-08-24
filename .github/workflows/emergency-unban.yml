@@ -20,4 +20,6 @@ jobs:
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           echo "213.165.89.90 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIARd0kanGEURbQpP7RkBU4e5eZZKR5QNF8pDInyqM6fW" >> ~/.ssh/known_hosts
-          ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts $VPS_USER@$VPS_HOST "cscli decisions delete --ip ${{ inputs.ip }}" || echo "FAILED (expected if deploy key is command-restricted or user lacks cscli/sudo access)"
+          ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts $VPS_USER@$VPS_HOST "sudo -n cscli decisions delete --ip ${{ inputs.ip }}" || echo "FAILED (expected if deploy key is command-restricted or user lacks cscli/sudo access)"
+          echo "--- sudo -l check ---"
+          ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts $VPS_USER@$VPS_HOST "sudo -n -l" || echo "sudo -l also failed/no access"
