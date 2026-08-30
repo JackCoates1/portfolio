@@ -28,6 +28,7 @@ jobs:
         run: npm ci
 
       - name: Build
+        id: build
         run: npm run build
 
       - name: Attest build provenance
@@ -54,6 +55,7 @@ jobs:
           "
 
       - name: Deploy to VPS
+        if: ${{ always() && steps.build.outcome == 'success' }}
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
