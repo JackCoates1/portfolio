@@ -9,15 +9,25 @@ const indexPage = await read("src/pages/Index.tsx");
 const hardeningRegression = await read("scripts/hardening-regression-check.mjs");
 const securityWorkflow = await read(".github/workflows/security.yml");
 const monitoringWorkflow = await read(".github/workflows/security-monitor.yml");
+const deployWorkflow = await read(".github/workflows/deploy.yml");
+const securityMonitor = await read("scripts/security-monitor.mjs");
 const operations = await read("docs/operations.md");
 
 assert.equal(packageJson.scripts["audit:osv"], "node scripts/osv-audit.mjs");
 assert.equal(packageJson.scripts.sbom, "npm sbom --sbom-format=cyclonedx");
 assert.equal(packageJson.scripts["monitor:security"], "node scripts/security-monitor.mjs");
+assert.match(securityMonitor, /"Production security monitor"/);
+assert.match(securityMonitor, /latest deployment, repository-security, and production-monitor runs succeeded/);
+assert.equal(packageJson.scripts["test:bundle-budget"], "node scripts/bundle-budget-check.mjs");
+await assert.doesNotReject(
+  access(new URL("../scripts/bundle-budget-check.mjs", import.meta.url)),
+  "the deterministic built-asset budget contract must exist",
+);
 
 assert.match(app, /lazy\(\(\) => import\("\.\/pages\/CyberLab"\)\)/);
 assert.match(app, /<Suspense/);
 assert.match(indexPage, /lazy\(\(\) => import\("@\/components\/SecurityDashboard"\)\)/);
+assert.match(indexPage, /new IntersectionObserver/);
 
 for (const unusedDependency of [
   "@hookform/resolvers",
@@ -50,12 +60,16 @@ assert.match(securityWorkflow, /npm audit --audit-level=high/);
 assert.match(securityWorkflow, /npm run audit:osv/);
 assert.match(securityWorkflow, /npm run --silent sbom > sbom\.cdx\.json/);
 assert.match(securityWorkflow, /sbom\.cdx\.json/);
+assert.match(securityWorkflow, /npm run build[\s\S]{0,250}npm run test:bundle-budget/);
 
 assert.match(monitoringWorkflow, /schedule:/);
 assert.match(monitoringWorkflow, /workflow_dispatch:/);
 assert.match(monitoringWorkflow, /npm run monitor:security/);
 assert.match(monitoringWorkflow, /zap-baseline\.py/);
 assert.doesNotMatch(monitoringWorkflow, /issues: write|pull-requests: write|continue-on-error/);
+assert.doesNotMatch(monitoringWorkflow, /slack|webhook|send-mail|create-issue/i);
+
+assert.match(deployWorkflow, /npm run build[\s\S]{0,250}npm run test:bundle-budget/);
 
 for (const workflow of [securityWorkflow, monitoringWorkflow]) {
   const actionReferences = [...workflow.matchAll(/^\s*uses:\s*([^\s#]+)(?:\s+#.*)?$/gm)];

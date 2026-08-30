@@ -129,19 +129,30 @@ const repository = option("--repository");
 if (repository) {
   await record("Actions status", async () => {
     assert.match(repository, /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/, "--repository must be owner/name");
-    const response = await fetch(`https://api.github.com/repos/${repository}/actions/runs?per_page=30`, {
+    const response = await fetch(`https://api.github.com/repos/${repository}/actions/workflows?per_page=100`, {
       headers: { Accept: "application/vnd.github+json", "User-Agent": "portfolio-security-monitor/1" },
       signal: AbortSignal.timeout(15_000),
     });
     assert.equal(response.status, 200, `public Actions API returned HTTP ${response.status}`);
     const body = await response.json();
-    for (const workflowName of ["Build, attest, and deploy to VPS", "Repository security"]) {
-      const run = body.workflow_runs?.find((candidate) => candidate.name === workflowName && candidate.status === "completed");
+    for (const workflowName of ["Build, attest, and deploy to VPS", "Repository security", "Production security monitor"]) {
+      const workflow = body.workflows?.find((candidate) => candidate.name === workflowName);
+      assert.ok(workflow, `${workflowName} workflow was not found`);
+      const runsResponse = await fetch(
+        `https://api.github.com/repos/${repository}/actions/workflows/${workflow.id}/runs?status=completed&per_page=1`,
+        {
+          headers: { Accept: "application/vnd.github+json", "User-Agent": "portfolio-security-monitor/1" },
+          signal: AbortSignal.timeout(15_000),
+        },
+      );
+      assert.equal(runsResponse.status, 200, `${workflowName} runs API returned HTTP ${runsResponse.status}`);
+      const runs = await runsResponse.json();
+      const run = runs.workflow_runs?.[0];
       assert.ok(run, `no completed ${workflowName} run found`);
       assert.equal(run.conclusion, "success", `latest ${workflowName} run concluded ${run.conclusion}`);
       assert.ok(Date.now() - Date.parse(run.updated_at) < 15 * 86_400_000, `${workflowName} has not completed recently`);
     }
-    return "latest deployment and repository-security runs succeeded";
+    return "latest deployment, repository-security, and production-monitor runs succeeded";
   });
 } else {
   notes.push("SKIP Actions status: pass --repository owner/name for a public repository");

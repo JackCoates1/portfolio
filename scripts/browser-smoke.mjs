@@ -120,7 +120,11 @@ const instrumentation = String.raw`
       }
       const externalHosts = new Set(["ipapi.co", "ipwho.is", "api4.ipify.org", "api6.ipify.org"]);
       if (!externalHosts.has(url.hostname)) return realFetch(input, init);
-      observed.push({ kind: "fetch", url: url.href });
+      observed.push({
+        kind: "fetch",
+        url: url.href,
+        referrerPolicy: init?.referrerPolicy ?? (input instanceof Request ? input.referrerPolicy : undefined),
+      });
 
       let body;
       if (url.hostname === "ipapi.co") {
@@ -261,6 +265,11 @@ try {
     ["fetch", "fetch", "fetch", "webrtc"],
   );
   assert.equal(observed.some(({ url = "" }) => url.startsWith("https://ipwho.is/")), false, "fallback provider should not run after a successful primary lookup");
+  assert.equal(
+    observed.filter(({ kind }) => kind === "fetch").every(({ referrerPolicy }) => referrerPolicy === "no-referrer"),
+    true,
+    "consented third-party fetches must suppress the referrer",
+  );
   assert.equal(observed.some(({ urls = [] }) => urls.includes("stun:stun.l.google.com:19302")), true, "configured STUN request was not observed");
 
   await waitFor(
@@ -289,7 +298,20 @@ try {
   assert.equal(await client.evaluate("document.querySelector('#mobile-navigation')?.hidden"), false, "expanded mobile navigation remained hidden");
   await client.evaluate("document.querySelector('[aria-controls=mobile-navigation]').click()");
   assert.equal(await client.evaluate("document.querySelector('#mobile-navigation')?.hidden"), true, "collapsed mobile navigation remained visible");
-  await waitFor(() => client.evaluate("document.body.textContent.includes('Verified')"), "lazy security dashboard did not render");
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  assert.equal(
+    networkRequests.some((url) => /\/assets\/SecurityDashboard-[^/]+\.js(?:$|\?)/.test(url)),
+    false,
+    "security dashboard chunk loaded before it was near the viewport",
+  );
+  assert.equal(await client.evaluate("document.body.textContent.includes('Verified')"), false, "security dashboard rendered before viewport proximity");
+  await client.evaluate("document.querySelector('#security').scrollIntoView({ block: 'center' })");
+  await waitFor(() => client.evaluate("document.body.textContent.includes('Verified')"), "viewport-proximate security dashboard did not render");
+  assert.equal(
+    networkRequests.some((url) => /\/assets\/SecurityDashboard-[^/]+\.js(?:$|\?)/.test(url)),
+    true,
+    "security dashboard chunk did not load near the viewport",
+  );
   assert.equal(await client.evaluate("[...document.querySelectorAll('a[target=_blank]')].every((link) => link.relList.contains('noopener') && link.relList.contains('noreferrer'))"), true, "external links must isolate their opener and referrer");
   assert.equal(await client.evaluate("document.querySelector('[href^=\"javascript:\"]') === null"), true, "untrusted data created an executable link");
   assert.equal(await client.evaluate("document.querySelector('[data-injection-probe]') === null"), true, "untrusted data created DOM nodes");
@@ -326,7 +348,7 @@ try {
   assert.deepEqual(await client.evaluate("globalThis.__smokeCspViolations"), [], "static 404 reported CSP violations");
   assert.deepEqual(networkRequests.filter((url) => !url.startsWith(baseUrl)), [], "unexpected real network request escaped the browser harness");
 
-  console.log("Chromium smoke passed: CSP, consent, network isolation, 404, DOM injection, links, ARIA/navigation, console, and mobile overflow.");
+  console.log("Chromium smoke passed: CSP, consent/referrer privacy, deferred dashboard loading, network isolation, 404, DOM injection, links, ARIA/navigation, console, and mobile overflow.");
 } finally {
   client?.close();
   browser.kill("SIGTERM");

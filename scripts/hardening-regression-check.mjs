@@ -19,6 +19,7 @@ const operations = await read("docs/operations.md");
 const packageJson = JSON.parse(await read("package.json"));
 const resume = JSON.parse(await read("public/api/resume"));
 const browserSmoke = await read("scripts/browser-smoke.mjs");
+const indexPage = await read("src/pages/Index.tsx");
 
 check("explicit consent gates every external Cyber Lab test", () => {
   assert.match(cyberLab, /const \[consentChecked, setConsentChecked\] = useState\(false\)/);
@@ -27,6 +28,24 @@ check("explicit consent gates every external Cyber Lab test", () => {
   assert.match(cyberLab, /I consent[^<]*run external network tests/i);
   assert.match(cyberLab, /Google(?:'s)? public STUN\s+service/);
   assert.match(cyberLab, /setConsentChecked\(false\)/);
+});
+
+check("consented third-party Cyber Lab fetches suppress the referrer", () => {
+  assert.equal([...cyberLab.matchAll(/\bfetch\(/g)].length, 1, "third-party fetches must share the hardened helper");
+  assert.match(cyberLab, /fetch\(url, \{[\s\S]{0,120}referrerPolicy: "no-referrer"/);
+  for (const provider of ["ipapi.co", "ipwho.is"]) {
+    assert.match(cyberLab, new RegExp(`fetchWithTimeout\\([^\\n]*${provider}`));
+  }
+  assert.match(cyberLab, /fetchStackIp = async \(version: 4 \| 6\)/);
+  assert.match(cyberLab, /fetchWithTimeout\(`https:\/\/api\$\{version\}\.ipify\.org/);
+});
+
+check("the heavy security dashboard import waits for viewport proximity", () => {
+  assert.match(indexPage, /new IntersectionObserver/);
+  assert.match(indexPage, /rootMargin: "600px 0px"/);
+  assert.match(indexPage, /if \(!\("IntersectionObserver" in window\)\)/);
+  assert.match(indexPage, /observer\.disconnect\(\)/);
+  assert.match(indexPage, /shouldLoad[\s\S]{0,300}<SecurityDashboard/);
 });
 
 check("artifact checksums exclude and verify the checksum manifest", () => {
@@ -57,6 +76,7 @@ check("deployment is gated by the complete repository test surface", () => {
     "npm run lint",
     "npm run test:site-contract",
     "npm run build",
+    "npm run test:bundle-budget",
     "npm run test:preview-contract",
     "npm run smoke:browser",
   ];

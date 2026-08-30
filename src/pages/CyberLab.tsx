@@ -31,7 +31,10 @@ interface GeoInfo {
 const fetchWithTimeout = (url: string, ms: number) => {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), ms);
-  return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(id));
+  return fetch(url, {
+    referrerPolicy: "no-referrer",
+    signal: controller.signal,
+  }).finally(() => clearTimeout(id));
 };
 
 // ipapi.co's free tier occasionally rate-limits or times out — fall back to a

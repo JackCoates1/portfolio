@@ -43,6 +43,10 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci
+      - name: Build production assets
+        run: npm run build
+      - name: Enforce production bundle budget
+        run: npm run test:bundle-budget
       - name: Audit npm dependencies
         run: npm audit --audit-level=high
       - name: Audit locked dependencies with OSV

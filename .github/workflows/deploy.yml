@@ -48,6 +48,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Enforce production bundle budget
+        run: npm run test:bundle-budget
+
       - name: Run production-like route contracts
         run: npm run test:preview-contract
 

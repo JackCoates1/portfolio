@@ -9,6 +9,7 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint . --max-warnings=0",
     "test:site-contract": "node scripts/site-contract-check.mjs && node scripts/hardening-regression-check.mjs && node scripts/security-tooling-contract-check.mjs",
+    "test:bundle-budget": "node scripts/bundle-budget-check.mjs",
     "test:preview-contract": "node scripts/preview-contract-check.mjs",
     "smoke:browser": "node scripts/browser-smoke.mjs",
     "preview": "node scripts/preview-server.mjs",
