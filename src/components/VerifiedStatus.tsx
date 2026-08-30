@@ -37,6 +37,7 @@ interface VerifiedStatusData {
 
 // server regenerates this every 15m, so polling faster than this is pointless
 const POLL_MS = 180_000;
+const REPOSITORY_SECURITY_URL = "https://github.com/JackCoates1/portfolio/security";
 
 const timeAgo = (iso: string) => {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -218,7 +219,7 @@ const VerifiedStatus = () => {
               </div>
               {status ? (
                 <a
-                  href={`${status.repo_url}/security/dependabot`}
+                  href={REPOSITORY_SECURITY_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex flex-wrap items-center gap-x-2 font-data text-xs text-foreground hover:text-primary transition-colors"

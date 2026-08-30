@@ -12,6 +12,13 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <Nav />
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-16 focus:z-[60] focus:rounded focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:text-primary"
+      >
+        Skip to content
+      </a>
+      <main id="main-content">
       <div id="home">
         <Hero />
       </div>
@@ -20,6 +27,7 @@ const Index = () => {
       <Projects />
       <SecurityDashboard />
       <Contact />
+      </main>
       <Footer />
       <TerminalEasterEgg />
     </div>
