@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,10 +14,10 @@ import {
 } from "lucide-react";
 
 // --- Data-collection helpers -------------------------------------------------
-// Everything here reads information the browser already exposes to any site
-// you visit — nothing is transmitted anywhere except a couple of small IP
-// lookups (public, keyless APIs, over HTTPS). The point of this page is to
-// make that normally-invisible exposure visible.
+// Local diagnostics read information the browser already exposes to any site.
+// External IP lookups and the WebRTC/STUN diagnostic are started only after an
+// explicit consent action so merely opening this route makes no third-party
+// requests.
 
 interface GeoInfo {
   ip: string;
@@ -103,25 +103,34 @@ const parseUserAgent = (ua: string) => {
 const getWebRTCLeak = (): Promise<string[]> =>
   new Promise((resolve) => {
     const ips = new Set<string>();
+    let settled = false;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+
+    const finish = (pc?: RTCPeerConnection) => {
+      if (settled) return;
+      settled = true;
+      if (timeout) clearTimeout(timeout);
+      pc?.close();
+      resolve(Array.from(ips));
+    };
+
     try {
       const pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
       pc.createDataChannel("");
       pc.onicecandidate = (event) => {
         if (!event.candidate) {
-          pc.close();
-          resolve(Array.from(ips));
+          finish(pc);
           return;
         }
         const match = event.candidate.candidate.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/);
         if (match) ips.add(match[1]);
       };
-      pc.createOffer().then((offer) => pc.setLocalDescription(offer));
-      setTimeout(() => {
-        pc.close();
-        resolve(Array.from(ips));
-      }, 2000);
+      void pc.createOffer()
+        .then((offer) => pc.setLocalDescription(offer))
+        .catch(() => finish(pc));
+      timeout = setTimeout(() => finish(pc), 2000);
     } catch {
-      resolve([]);
+      finish();
     }
   });
 
@@ -188,12 +197,12 @@ const CyberLab = () => {
   const [geo, setGeo] = useState<GeoInfo | null>(null);
   const [geoError, setGeoError] = useState(false);
   const [geoAttempt, setGeoAttempt] = useState(0);
+  const [externalTestsConsented, setExternalTestsConsented] = useState(false);
   const [ipv4, setIpv4] = useState<string | null | undefined>(undefined);
   const [ipv6, setIpv6] = useState<string | null | undefined>(undefined);
   const [webrtcIps, setWebrtcIps] = useState<string[] | null>(null);
   const [canvasHash] = useState(() => getCanvasFingerprint());
   const [typed, setTyped] = useState(false);
-  const startTime = useRef(performance.now());
 
   useEffect(() => {
     const t = setTimeout(() => setTyped(true), 300);
@@ -201,6 +210,8 @@ const CyberLab = () => {
   }, []);
 
   useEffect(() => {
+    if (!externalTestsConsented) return;
+
     setGeo(null);
     setGeoError(false);
 
@@ -210,8 +221,18 @@ const CyberLab = () => {
 
     fetchStackIp(4).then(setIpv4);
     fetchStackIp(6).then(setIpv6);
+  }, [externalTestsConsented, geoAttempt]);
+
+  useEffect(() => {
+    if (!externalTestsConsented) return;
     getWebRTCLeak().then(setWebrtcIps);
-  }, [geoAttempt]);
+  }, [externalTestsConsented]);
+
+  const startExternalTests = () => {
+    setIpv4(undefined);
+    setIpv6(undefined);
+    setExternalTestsConsented(true);
+  };
 
   const ua = navigator.userAgent;
   const { browser, os, deviceType } = parseUserAgent(ua);
@@ -261,21 +282,51 @@ const CyberLab = () => {
           </p>
           <p className="text-muted-foreground max-w-2xl leading-relaxed mt-2">
             Every site you visit can read some or all of what's shown below, usually silently.
-            This page collects it openly instead — everything here comes straight from your own
-            browser, plus a couple of IP lookups, so you can see exactly what a typical
-            fingerprinting or analytics script has access to.
+            This page collects it openly instead. Browser-derived details stay in your browser;
+            every external network diagnostic waits for your explicit consent below.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {!externalTestsConsented && (
+            <Card className="md:col-span-2 border-primary/30 bg-primary/5">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base font-mono">
+                  <ShieldAlert className="w-4 h-4 text-primary" />
+                  External network test consent
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Running the tests sends your public IP address and request metadata to ipapi.co,
+                  ipwho.is, and ipify.org. The WebRTC diagnostic also contacts Google's public STUN
+                  service to gather connection candidates. Those providers handle the requests
+                  under their own privacy practices. Nothing is stored by this site.
+                </p>
+                <button
+                  type="button"
+                  onClick={startExternalTests}
+                  className="rounded-md bg-primary px-3 py-2 text-xs font-mono font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  I consent — run external network tests
+                </button>
+              </CardContent>
+            </Card>
+          )}
+
           <SectionCard icon={Globe} title="Network & Location">
-            {geoError ? (
+            {!externalTestsConsented ? (
+              <p className="text-sm text-muted-foreground">
+                Waiting for consent. No network or location request has been sent.
+              </p>
+            ) : geoError ? (
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">
                   Geolocation lookup unavailable right now (provider rate-limited or unreachable
                   from this network).
                 </p>
                 <button
+                  type="button"
                   onClick={() => setGeoAttempt((n) => n + 1)}
                   className="text-xs font-mono text-primary hover:underline"
                 >
@@ -325,7 +376,11 @@ const CyberLab = () => {
           </SectionCard>
 
           <SectionCard icon={Wifi} title="WebRTC Leak Test">
-            {webrtcIps === null ? (
+            {!externalTestsConsented ? (
+              <p className="text-sm text-muted-foreground">
+                Waiting for consent. No STUN service has been contacted.
+              </p>
+            ) : webrtcIps === null ? (
               <div className="space-y-3">
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-2/3" />
@@ -385,8 +440,8 @@ const CyberLab = () => {
                 </p>
                 <p className="text-xs text-muted-foreground mt-3 font-mono flex items-center gap-2">
                   <Network className="w-3.5 h-3.5" />
-                  Nothing on this page is stored or sent anywhere beyond a couple of IP lookups —
-                  view source if you don't believe me.
+                  Nothing on this page is stored. External requests—including the WebRTC STUN
+                  request—are sent only after you explicitly consent to run the network tests.
                 </p>
               </div>
             </div>

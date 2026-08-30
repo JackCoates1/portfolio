@@ -1,25 +1,33 @@
-name: Deploy to VPS
+name: Build, attest, and deploy to VPS
 
 on:
   push:
     branches:
       - main
 
-permissions:
-  contents: read
-  id-token: write
-  attestations: write
+# Deny the token everything by default. Only the attestation job can mint an OIDC
+# token and write an attestation; the deployment job receives no GITHUB_TOKEN
+# permissions.
+permissions: {}
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      artifact-digest: ${{ steps.archive-digest.outputs.sha256 }}
 
     steps:
+      # v4.2.2
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
 
+      # v4.0.4
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6
         with:
           node-version: 20
           cache: npm
@@ -27,22 +35,167 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check production dependency advisories
+        run: npm audit --omit=dev
+
+      - name: Run static site contracts
+        run: npm run test:site-contract
+
       - name: Build
         run: npm run build
 
-      - name: Attest build provenance
-        uses: actions/attest-build-provenance@v1
+      - name: Validate and package deployment artifact
+        id: archive-digest
+        run: |
+          set -eu
+          test -s dist/index.html
+          test -s dist/404.html
+          test -s dist/site.webmanifest
+          test -s dist/security.txt
+          test -s dist/.well-known/security.txt
+          test -s dist/api/resume
+          (
+            cd dist
+            find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS
+            test -s SHA256SUMS
+            sha256sum --check SHA256SUMS
+          )
+          tar -czf portfolio-dist.tar.gz -C dist .
+          test -s portfolio-dist.tar.gz
+          sha256sum portfolio-dist.tar.gz > portfolio-dist.tar.gz.sha256
+          read -r archive_digest archive_name < portfolio-dist.tar.gz.sha256
+          test "$archive_name" = "portfolio-dist.tar.gz"
+          test "${#archive_digest}" -eq 64
+          case "$archive_digest" in *[!a-f0-9]*) exit 1 ;; esac
+          printf 'sha256=%s\n' "$archive_digest" >> "$GITHUB_OUTPUT"
+
+      # v4.6.2
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          subject-path: "dist/**"
+          name: portfolio-dist
+          path: |
+            portfolio-dist.tar.gz
+            portfolio-dist.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+  attest:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+
+    steps:
+      # v4.3.0
+      - name: Download deployment artifact for attestation
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: portfolio-dist
+
+      - name: Verify artifact before attestation
+        env:
+          EXPECTED_ARTIFACT_DIGEST: ${{ needs.build.outputs.artifact-digest }}
+        run: |
+          set -eu
+          : "${EXPECTED_ARTIFACT_DIGEST:?artifact digest is required}"
+          test -s portfolio-dist.tar.gz
+          test -s portfolio-dist.tar.gz.sha256
+          sha256sum --check portfolio-dist.tar.gz.sha256
+          read -r actual_digest archive_name < portfolio-dist.tar.gz.sha256
+          test "$archive_name" = "portfolio-dist.tar.gz"
+          test "${#actual_digest}" -eq 64
+          case "$actual_digest" in *[!a-f0-9]*) exit 1 ;; esac
+          test "$actual_digest" = "$EXPECTED_ARTIFACT_DIGEST"
+
+      # v1.4.0
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@1d7d81b81e4f81c111e59801041513b205b4d6c5
+        with:
+          subject-path: portfolio-dist.tar.gz
+
+  deploy:
+    needs: [build, attest]
+    permissions: {}
+    runs-on: ubuntu-latest
+
+    steps:
+      # v4.3.0
+      - name: Download deployment artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: portfolio-dist
+
+      - name: Verify deployment artifact
+        env:
+          EXPECTED_ARTIFACT_DIGEST: ${{ needs.build.outputs.artifact-digest }}
+        run: |
+          set -eu
+          : "${EXPECTED_ARTIFACT_DIGEST:?artifact digest is required}"
+          test -s portfolio-dist.tar.gz
+          test -s portfolio-dist.tar.gz.sha256
+          sha256sum --check portfolio-dist.tar.gz.sha256
+          read -r actual_digest archive_name < portfolio-dist.tar.gz.sha256
+          test "$archive_name" = "portfolio-dist.tar.gz"
+          test "${#actual_digest}" -eq 64
+          case "$actual_digest" in *[!a-f0-9]*) exit 1 ;; esac
+          test "$actual_digest" = "$EXPECTED_ARTIFACT_DIGEST"
+          mkdir dist
+          tar -xzf portfolio-dist.tar.gz --no-same-owner -C dist
+          (
+            cd dist
+            test -s SHA256SUMS
+            sha256sum --check SHA256SUMS
+          )
+          test -s dist/index.html
+          test -s dist/404.html
+          test -s dist/site.webmanifest
+          test -s dist/.well-known/security.txt
+          test -s dist/api/resume
 
       - name: Deploy to VPS
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_DEPLOY_PATH: ${{ secrets.VPS_DEPLOY_PATH }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          echo "$VPS_HOST ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIARd0kanGEURbQpP7RkBU4e5eZZKR5QNF8pDInyqM6fW" >> ~/.ssh/known_hosts
-          rsync -az --delete -e "ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts" --exclude=security-stats.json --exclude=verified-status.json dist/ $VPS_USER@$VPS_HOST:$VPS_DEPLOY_PATH/
+          set -eu
+          : "${VPS_HOST:?VPS_HOST is required}"
+          : "${VPS_USER:?VPS_USER is required}"
+          : "${VPS_DEPLOY_PATH:?VPS_DEPLOY_PATH is required}"
+          : "${VPS_SSH_KEY:?VPS_SSH_KEY is required}"
+
+          case "$VPS_USER" in
+            *[!A-Za-z0-9._-]*) echo "VPS_USER contains unsafe characters" >&2; exit 1 ;;
+          esac
+          case "$VPS_HOST" in
+            *[!A-Za-z0-9.-]*) echo "VPS_HOST contains unsafe characters" >&2; exit 1 ;;
+          esac
+          deploy_path="${VPS_DEPLOY_PATH%/}"
+          case "$deploy_path" in
+            /?*/?*) ;;
+            *) echo "VPS_DEPLOY_PATH is unsafe: use an absolute path with at least two components" >&2; exit 1 ;;
+          esac
+          case "$deploy_path" in
+            *[!A-Za-z0-9._/-]*|*//*|*/../*|*/..|*/./*|*/.)
+              echo "VPS_DEPLOY_PATH is unsafe: remove traversal or special characters" >&2
+              exit 1
+              ;;
+          esac
+
+          ssh_dir="$RUNNER_TEMP/portfolio-ssh"
+          key_file="$ssh_dir/deploy_key"
+          known_hosts="$ssh_dir/known_hosts"
+          trap 'rm -f "$key_file" "$known_hosts"; rmdir "$ssh_dir" 2>/dev/null || true' EXIT
+          install -d -m 700 "$ssh_dir"
+          printf '%s\n' "$VPS_SSH_KEY" > "$key_file"
+          chmod 600 "$key_file"
+          printf '%s\n' "$VPS_HOST ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIARd0kanGEURbQpP7RkBU4e5eZZKR5QNF8pDInyqM6fW" > "$known_hosts"
+          ssh_options="-F /dev/null -i $key_file -o UserKnownHostsFile=$known_hosts -o StrictHostKeyChecking=yes -o BatchMode=yes -o IdentitiesOnly=yes"
+          rsync -az --delete-delay --delay-updates --protect-args -e "ssh $ssh_options" \
+            --exclude=security-stats.json --exclude=verified-status.json \
+            dist/ "${VPS_USER}@${VPS_HOST}:${deploy_path}/"

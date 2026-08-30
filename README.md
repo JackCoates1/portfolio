@@ -23,28 +23,36 @@ npm run dev
 
 ## Deploy
 
-Push to `main` — GitHub Actions builds and deploys to a VPS running nginx + CrowdSec. See `.github/workflows/deploy.yml`.
+Push to `main` — GitHub Actions installs dependencies, audits production dependencies,
+runs contracts, builds, attests the artifact, and then deploys to the VPS. It does not
+deploy pull requests or forks. See `.github/workflows/deploy.yml` and the
+[security and release operations guide](docs/operations.md).
 
 ### Static-hosting notes
 
-- `public/404.html` is deployed as a real static 404 page for hosts that serve
-  missing files with their 404 document. Keep the SPA fallback pointed at
-  `index.html` for client routes such as `/cyberlab`; the React router renders
-  its own not-found view after that fallback.
+- `public/404.html` is deployed as a real static 404 page. Configure the host
+  to rewrite only known browser routes (currently `/cyberlab`) to `index.html`;
+  a catch-all SPA fallback returns 200 for missing pages and is not compatible
+  with real static 404 behaviour.
 - Both `/security.txt` and `/.well-known/security.txt` are static files with
   the same policy. The latter remains the canonical RFC 9116 location.
+- `public/site.webmanifest` is linked from the document and must be deployed
+  alongside the favicon.
 
 ### CSP and Cloudflare
 
-This repository only contains a fallback CSP meta tag; the enforcing nginx CSP
-header and Cloudflare settings are deployment configuration and are not stored
-here. If Cloudflare reports that an injected script is blocked by `script-src
-'self'`, keep that directive intact and disable the feature injecting it (for
-example Rocket Loader or Email Address Obfuscation) for this site, or configure
-that feature to use a nonce accepted by the origin CSP. Do not add
-`'unsafe-inline'` to `script-src` to silence the report. Confirm the final
-response header at the edge and origin after deployment, because a Cloudflare
-rule can override the origin header.
+The fallback CSP in `index.html` is contract-tested. The enforcing nginx CSP
+header and CDN settings are deployment configuration; they must retain
+`script-src 'self'` and include the additional header-only protections described
+in [the operations guide](docs/operations.md). If a CDN feature injects a script
+that is blocked, disable it or configure a nonce—never add `'unsafe-inline'` to
+`script-src` to silence the report. Confirm final headers at both origin and edge.
+
+### Cyber Lab privacy
+
+Cyber Lab shows browser-derived data locally. Public IP, approximate-location,
+and WebRTC/STUN tests do not start until the visitor explicitly consents after
+reading which third-party providers receive the requests.
 
 ## Stack
 
