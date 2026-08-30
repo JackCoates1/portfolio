@@ -102,7 +102,7 @@ check("action pins and comments identify reviewed releases", () => {
   const expected = new Map([
     ["actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683", "v4.2.2"],
     ["actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6", "v4.0.4"],
-    ["actions/attest-build-provenance@1d7d81b81e4f81c111e59801041513b205b4d6c5", "v1.4.0"],
+    ["actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8", "v4.2.2"],
     ["actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02", "v4.6.2"],
     ["actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093", "v4.3.0"],
   ]);
