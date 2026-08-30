@@ -196,8 +196,8 @@ const SectionCard = ({
 const CyberLab = () => {
   const [geo, setGeo] = useState<GeoInfo | null>(null);
   const [geoError, setGeoError] = useState(false);
-  const [geoAttempt, setGeoAttempt] = useState(0);
-  const [externalTestsConsented, setExternalTestsConsented] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [externalTestRun, setExternalTestRun] = useState(0);
   const [ipv4, setIpv4] = useState<string | null | undefined>(undefined);
   const [ipv6, setIpv6] = useState<string | null | undefined>(undefined);
   const [webrtcIps, setWebrtcIps] = useState<string[] | null>(null);
@@ -210,7 +210,7 @@ const CyberLab = () => {
   }, []);
 
   useEffect(() => {
-    if (!externalTestsConsented) return;
+    if (externalTestRun === 0) return;
 
     setGeo(null);
     setGeoError(false);
@@ -221,17 +221,22 @@ const CyberLab = () => {
 
     fetchStackIp(4).then(setIpv4);
     fetchStackIp(6).then(setIpv6);
-  }, [externalTestsConsented, geoAttempt]);
+  }, [externalTestRun]);
 
   useEffect(() => {
-    if (!externalTestsConsented) return;
+    if (externalTestRun === 0) return;
     getWebRTCLeak().then(setWebrtcIps);
-  }, [externalTestsConsented]);
+  }, [externalTestRun]);
 
   const startExternalTests = () => {
+    if (!consentChecked) return;
+    setGeo(null);
+    setGeoError(false);
     setIpv4(undefined);
     setIpv6(undefined);
-    setExternalTestsConsented(true);
+    setWebrtcIps(null);
+    setExternalTestRun((run) => run + 1);
+    setConsentChecked(false);
   };
 
   const ua = navigator.userAgent;
@@ -288,34 +293,54 @@ const CyberLab = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {!externalTestsConsented && (
-            <Card className="md:col-span-2 border-primary/30 bg-primary/5">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base font-mono">
-                  <ShieldAlert className="w-4 h-4 text-primary" />
-                  External network test consent
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          <Card className="md:col-span-2 border-primary/30 bg-primary/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base font-mono">
+                <ShieldAlert className="w-4 h-4 text-primary" />
+                External network test consent
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  Running the tests sends your public IP address and request metadata to ipapi.co,
-                  ipwho.is, and ipify.org. The WebRTC diagnostic also contacts Google's public STUN
-                  service to gather connection candidates. Those providers handle the requests
-                  under their own privacy practices. Nothing is stored by this site.
+                  <strong className="text-foreground">Local-only mode is active by default.</strong>{" "}
+                  Browser, device, screen, and canvas details are derived in this browser and are
+                  not sent anywhere by this site. The optional network tests make the following
+                  third-party requests:
                 </p>
+                <ul className="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+                  <li><a href="https://ipapi.co/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">ipapi.co</a> receives your public IP and request metadata and returns approximate location and network details.</li>
+                  <li><a href="https://ipwho.is/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">ipwho.is</a> receives the same data only if the primary geolocation provider fails.</li>
+                  <li><a href="https://api4.ipify.org/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">api4.ipify.org</a> receives request metadata and returns your public IPv4 address.</li>
+                  <li><a href="https://api6.ipify.org/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">api6.ipify.org</a> receives request metadata and returns your public IPv6 address.</li>
+                  <li><span className="text-foreground">stun.l.google.com</span> is Google's public STUN service; it receives connection metadata while the browser gathers WebRTC candidates.</li>
+                </ul>
+                <p className="text-sm text-muted-foreground">
+                  Each consent authorizes one test run only, including a possible geolocation
+                  fallback. Another run or retry requires checking the consent box again. Providers
+                  process requests under their own privacy practices; this site does not store the results.
+                </p>
+                <label className="flex items-start gap-3 text-sm text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={consentChecked}
+                    onChange={(event) => setConsentChecked(event.target.checked)}
+                    className="mt-1 h-4 w-4 accent-primary"
+                  />
+                  <span>I understand which providers receive my data and consent to one external test run.</span>
+                </label>
                 <button
                   type="button"
                   onClick={startExternalTests}
+                  disabled={!consentChecked}
                   className="rounded-md bg-primary px-3 py-2 text-xs font-mono font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   I consent — run external network tests
                 </button>
-              </CardContent>
-            </Card>
-          )}
+            </CardContent>
+          </Card>
 
           <SectionCard icon={Globe} title="Network & Location">
-            {!externalTestsConsented ? (
+            {externalTestRun === 0 ? (
               <p className="text-sm text-muted-foreground">
                 Waiting for consent. No network or location request has been sent.
               </p>
@@ -325,13 +350,7 @@ const CyberLab = () => {
                   Geolocation lookup unavailable right now (provider rate-limited or unreachable
                   from this network).
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setGeoAttempt((n) => n + 1)}
-                  className="text-xs font-mono text-primary hover:underline"
-                >
-                  retry lookup →
-                </button>
+                <p className="text-xs font-mono text-primary">Check the consent box above to authorize another run.</p>
               </div>
             ) : !geo ? (
               <div className="space-y-3">
@@ -376,7 +395,7 @@ const CyberLab = () => {
           </SectionCard>
 
           <SectionCard icon={Wifi} title="WebRTC Leak Test">
-            {!externalTestsConsented ? (
+            {externalTestRun === 0 ? (
               <p className="text-sm text-muted-foreground">
                 Waiting for consent. No STUN service has been contacted.
               </p>

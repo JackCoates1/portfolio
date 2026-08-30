@@ -1,0 +1,61 @@
+name: Repository security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "23 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repository-security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Review dependency changes
+        # v4.7.1
+        uses: actions/dependency-review-action@da24556b548a50705dd671f47852072ea4c105d9
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: never
+
+  audit-and-sbom:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        # v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        # v4.0.4
+        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Audit npm dependencies
+        run: npm audit --audit-level=high
+      - name: Audit locked dependencies with OSV
+        run: npm run audit:osv
+      - name: Generate CycloneDX SBOM
+        run: npm run --silent sbom > sbom.cdx.json
+      - name: Validate SBOM
+        run: node -e "const fs=require('node:fs'); const x=JSON.parse(fs.readFileSync('sbom.cdx.json')); if(x.bomFormat!=='CycloneDX'||!Array.isArray(x.components)) process.exit(1)"
+      - name: Upload SBOM
+        # v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: cyclonedx-sbom
+          path: sbom.cdx.json
+          if-no-files-found: error
+          retention-days: 30

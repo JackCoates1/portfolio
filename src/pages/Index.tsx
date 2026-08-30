@@ -1,12 +1,14 @@
+import { lazy, Suspense } from "react";
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Skills from "@/components/Skills";
 import Projects from "@/components/Projects";
-import SecurityDashboard from "@/components/SecurityDashboard";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import TerminalEasterEgg from "@/components/TerminalEasterEgg";
+
+const SecurityDashboard = lazy(() => import("@/components/SecurityDashboard"));
 
 const Index = () => {
   return (
@@ -25,7 +27,9 @@ const Index = () => {
       <About />
       <Skills />
       <Projects />
-      <SecurityDashboard />
+      <Suspense fallback={<div id="security" className="py-20 text-center text-sm text-muted-foreground" role="status">Loading security dashboard…</div>}>
+        <SecurityDashboard />
+      </Suspense>
       <Contact />
       </main>
       <Footer />

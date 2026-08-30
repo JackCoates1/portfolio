@@ -94,6 +94,7 @@ const instrumentation = String.raw`
   (() => {
     const observed = [];
     const violations = [];
+    globalThis.__domInjectionExecuted = false;
     Object.defineProperty(globalThis, "__smokeExternalRequests", { value: observed });
     Object.defineProperty(globalThis, "__smokeCspViolations", { value: violations });
     addEventListener("securitypolicyviolation", (event) => {
@@ -111,10 +112,10 @@ const instrumentation = String.raw`
       }
       if (url.origin === location.origin && url.pathname === "/verified-status.json") {
         return Promise.resolve(new Response(JSON.stringify({
-          generated_at: new Date().toISOString(), repo_url: "https://example.invalid/repository", repo_public: true,
+          generated_at: new Date().toISOString(), repo_url: "javascript:globalThis.__domInjectionExecuted=true", repo_public: true,
           dependency_alerts: { open_total: 0, by_severity: { critical: 0, high: 0, medium: 0, low: 0 } },
-          latest_commit: { sha: "0000000", gpg_verified: true, verification_reason: "smoke fixture" },
-          latest_build: { run_url: "https://example.invalid/build", conclusion: "success", has_attestation: true },
+          latest_commit: { sha: '\"><img data-injection-probe src=x onerror="globalThis.__domInjectionExecuted=true">', gpg_verified: true, verification_reason: "smoke fixture" },
+          latest_build: { run_url: "javascript:globalThis.__domInjectionExecuted=true", conclusion: "success", has_attestation: true },
         }), { status: 200, headers: { "Content-Type": "application/json" } }));
       }
       const externalHosts = new Set(["ipapi.co", "ipwho.is", "api4.ipify.org", "api6.ipify.org"]);
@@ -194,6 +195,8 @@ try {
   await client.open();
 
   const errors = [];
+  const networkRequests = [];
+  const responses = [];
   client.on("Runtime.exceptionThrown", ({ exceptionDetails }) => errors.push(`exception: ${exceptionDetails.text}`));
   client.on("Runtime.consoleAPICalled", ({ type, args }) => {
     if (type === "error" || type === "assert") errors.push(`console.${type}: ${args.map((arg) => arg.value ?? arg.description).join(" ")}`);
@@ -201,6 +204,8 @@ try {
   client.on("Log.entryAdded", ({ entry }) => {
     if (entry.level === "error") errors.push(`log: ${entry.text}`);
   });
+  client.on("Network.requestWillBeSent", ({ request }) => networkRequests.push(request.url));
+  client.on("Network.responseReceived", ({ response }) => responses.push({ url: response.url, status: response.status }));
 
   await Promise.all([
     client.send("Page.enable"),
@@ -230,6 +235,12 @@ try {
 
   assert.deepEqual(await client.evaluate("globalThis.__smokeExternalRequests"), [], "external tests ran before consent");
   assert.equal(await client.evaluate("document.documentElement.scrollWidth <= window.innerWidth && document.body.scrollWidth <= window.innerWidth"), true, "Cyber Lab overflows a 390px viewport");
+  assert.equal(await client.evaluate("document.body.textContent.includes('Local-only mode')"), true, "local-only mode is not explained");
+  assert.equal(await client.evaluate("document.querySelector('input[type=checkbox]') !== null"), true, "per-run consent checkbox is missing");
+  assert.equal(await client.evaluate("[...document.querySelectorAll('button')].find((button) => button.textContent.includes('run external network tests'))?.disabled"), true, "external tests must be disabled until consent is checked");
+  assert.deepEqual(networkRequests.filter((url) => !url.startsWith(baseUrl)), [], "unexpected network request before consent");
+
+  await client.evaluate("document.querySelector('input[type=checkbox]').click()");
 
   const clickedConsent = await client.evaluate(`
     (() => {
@@ -257,6 +268,8 @@ try {
     "consented network results did not render",
   );
   assert.deepEqual(await client.evaluate("globalThis.__smokeCspViolations"), [], "browser reported CSP violations");
+  assert.equal(await client.evaluate("document.querySelector('input[type=checkbox]').checked"), false, "consent must be consumed after one run");
+  assert.equal(await client.evaluate("[...document.querySelectorAll('button')].find((button) => button.textContent.includes('run external network tests'))?.disabled"), true, "another run must require fresh consent");
 
   const clickedHome = await client.evaluate(`
     (() => {
@@ -269,6 +282,18 @@ try {
   assert.equal(clickedHome, true, "Back home navigation is missing");
   await waitFor(() => client.evaluate("location.pathname === '/' && document.querySelector('main#main-content') !== null"), "home navigation failed");
   assert.equal(await client.evaluate("document.documentElement.scrollWidth <= window.innerWidth && document.body.scrollWidth <= window.innerWidth"), true, "home page overflows a 390px viewport");
+  assert.equal(await client.evaluate("document.querySelector('nav')?.getAttribute('aria-label')"), "Primary navigation", "primary navigation needs an accessible name");
+  assert.equal(await client.evaluate("document.querySelector('[aria-controls=mobile-navigation]')?.getAttribute('aria-expanded')"), "false", "mobile navigation must start collapsed");
+  await client.evaluate("document.querySelector('[aria-controls=mobile-navigation]').click()");
+  assert.equal(await client.evaluate("document.querySelector('[aria-controls=mobile-navigation]')?.getAttribute('aria-expanded')"), "true", "mobile navigation did not expose its expanded state");
+  assert.equal(await client.evaluate("document.querySelector('#mobile-navigation')?.hidden"), false, "expanded mobile navigation remained hidden");
+  await client.evaluate("document.querySelector('[aria-controls=mobile-navigation]').click()");
+  assert.equal(await client.evaluate("document.querySelector('#mobile-navigation')?.hidden"), true, "collapsed mobile navigation remained visible");
+  await waitFor(() => client.evaluate("document.body.textContent.includes('Verified')"), "lazy security dashboard did not render");
+  assert.equal(await client.evaluate("[...document.querySelectorAll('a[target=_blank]')].every((link) => link.relList.contains('noopener') && link.relList.contains('noreferrer'))"), true, "external links must isolate their opener and referrer");
+  assert.equal(await client.evaluate("document.querySelector('[href^=\"javascript:\"]') === null"), true, "untrusted data created an executable link");
+  assert.equal(await client.evaluate("document.querySelector('[data-injection-probe]') === null"), true, "untrusted data created DOM nodes");
+  assert.equal(await client.evaluate("globalThis.__domInjectionExecuted"), false, "untrusted data executed script");
 
   const clickedCyberLab = await client.evaluate(`
     (() => {
@@ -281,10 +306,27 @@ try {
   assert.equal(clickedCyberLab, true, "Cyber Lab navigation link is missing");
   await waitFor(() => client.evaluate("location.pathname === '/cyberlab' && document.querySelector('h1')?.textContent?.trim() === 'Cyber Lab'"), "Cyber Lab navigation failed");
   assert.deepEqual(await client.evaluate("globalThis.__smokeExternalRequests"), observed, "return navigation started external tests without new consent");
-  assert.equal(await client.evaluate("[...document.querySelectorAll('button')].some((button) => button.textContent.includes('I consent'))"), true, "return navigation did not restore the consent control");
+  assert.equal(await client.evaluate("document.querySelector('input[type=checkbox]:not(:checked)') !== null"), true, "return navigation did not restore fresh consent");
+
+  await client.evaluate(`
+    history.pushState({}, "", "/client-not-found-%3Cimg%20data-injection-probe%20src=x%20onerror=globalThis.__domInjectionExecuted=true%3E");
+    dispatchEvent(new PopStateEvent("popstate"));
+  `);
+  await waitFor(() => client.evaluate("document.body.textContent.includes('Nothing here')"), "client-side 404 did not render");
+  assert.equal(await client.evaluate("document.querySelector('[data-injection-probe]') === null"), true, "client-side path content was interpreted as markup");
+  assert.equal(await client.evaluate("globalThis.__domInjectionExecuted"), false, "client-side path content executed script");
   assert.deepEqual(errors, [], "browser console/runtime errors were reported");
 
-  console.log("Chromium smoke passed: CSP, consent network gating, navigation, console, and mobile overflow.");
+  const injectionPath = "/not-found-%3Cimg%20data-injection-probe%20src=x%20onerror=globalThis.__domInjectionExecuted=true%3E";
+  await client.send("Page.navigate", { url: `${baseUrl}${injectionPath}` });
+  await waitFor(() => client.evaluate("document.title === 'Page not found | Jack Coates'"), "static 404 did not render in Chromium");
+  assert.equal(responses.some(({ url, status }) => url === `${baseUrl}${injectionPath}` && status === 404), true, "browser did not receive an HTTP 404");
+  assert.equal(await client.evaluate("document.querySelector('[data-injection-probe]') === null"), true, "404 path content was interpreted as markup");
+  assert.equal(await client.evaluate("globalThis.__domInjectionExecuted"), false, "404 path content executed script");
+  assert.deepEqual(await client.evaluate("globalThis.__smokeCspViolations"), [], "static 404 reported CSP violations");
+  assert.deepEqual(networkRequests.filter((url) => !url.startsWith(baseUrl)), [], "unexpected real network request escaped the browser harness");
+
+  console.log("Chromium smoke passed: CSP, consent, network isolation, 404, DOM injection, links, ARIA/navigation, console, and mobile overflow.");
 } finally {
   client?.close();
   browser.kill("SIGTERM");

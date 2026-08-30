@@ -39,14 +39,20 @@ jobs:
       - name: Check production dependency advisories
         run: npm audit --omit=dev
 
-      - name: Run static site contracts
-        run: node scripts/site-contract-check.mjs
+      - name: Lint
+        run: npm run lint
 
-      - name: Run hardening regression contracts
-        run: node scripts/hardening-regression-check.mjs
+      - name: Run repository security contracts
+        run: npm run test:site-contract
 
       - name: Build
         run: npm run build
+
+      - name: Run production-like route contracts
+        run: npm run test:preview-contract
+
+      - name: Run Chromium security regressions
+        run: npm run smoke:browser
 
       - name: Validate and package deployment artifact
         id: archive-digest
@@ -58,6 +64,11 @@ jobs:
           test -s dist/security.txt
           test -s dist/.well-known/security.txt
           test -s dist/api/resume
+          test ! -e dist/.env
+          test ! -e dist/.git
+          test ! -e dist/package.json
+          test ! -e dist/src
+          test -z "$(find dist -type f -name '*.map' -print -quit)"
           (
             cd dist
             find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS

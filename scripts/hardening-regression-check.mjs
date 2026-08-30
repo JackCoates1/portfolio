@@ -1,9 +1,6 @@
 import { strict as assert } from "node:assert";
-import { execFile } from "node:child_process";
-import { lstat, readFile } from "node:fs/promises";
-import { promisify } from "node:util";
+import { readFile } from "node:fs/promises";
 
-const execFileAsync = promisify(execFile);
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const failures = [];
 const checks = [];
@@ -24,11 +21,12 @@ const resume = JSON.parse(await read("public/api/resume"));
 const browserSmoke = await read("scripts/browser-smoke.mjs");
 
 check("explicit consent gates every external Cyber Lab test", () => {
-  assert.match(cyberLab, /const \[externalTestsConsented, setExternalTestsConsented\] = useState\(false\)/);
-  assert.match(cyberLab, /if \(!externalTestsConsented\) return;[\s\S]{0,700}fetchGeo\(\)/);
-  assert.match(cyberLab, /if \(!externalTestsConsented\) return;[\s\S]{0,350}getWebRTCLeak\(\)/);
+  assert.match(cyberLab, /const \[consentChecked, setConsentChecked\] = useState\(false\)/);
+  assert.match(cyberLab, /if \(externalTestRun === 0\) return;[\s\S]{0,700}fetchGeo\(\)/);
+  assert.match(cyberLab, /if \(externalTestRun === 0\) return;[\s\S]{0,350}getWebRTCLeak\(\)/);
   assert.match(cyberLab, /I consent[^<]*run external network tests/i);
   assert.match(cyberLab, /Google(?:'s)? public STUN\s+service/);
+  assert.match(cyberLab, /setConsentChecked\(false\)/);
 });
 
 check("artifact checksums exclude and verify the checksum manifest", () => {
@@ -52,6 +50,25 @@ check("deployment transfers one verified archive including hidden artifacts", ()
   assert.match(deployWorkflow, /actions\/upload-artifact@[a-f0-9]{40}/);
   assert.match(deployWorkflow, /actions\/download-artifact@[a-f0-9]{40}/);
   assert.match(deployWorkflow, /sha256sum (?:--check|-c)/);
+});
+
+check("deployment is gated by the complete repository test surface", () => {
+  const commands = [
+    "npm run lint",
+    "npm run test:site-contract",
+    "npm run build",
+    "npm run test:preview-contract",
+    "npm run smoke:browser",
+  ];
+  let previousIndex = -1;
+  for (const command of commands) {
+    const index = deployWorkflow.indexOf(command);
+    assert.ok(index > previousIndex, `${command} must run in gate order before packaging`);
+    previousIndex = index;
+  }
+  assert.ok(previousIndex < deployWorkflow.indexOf("Validate and package deployment artifact"));
+  assert.match(deployWorkflow, /find dist -type f -name '\*\.map'/);
+  assert.match(deployWorkflow, /test ! -e dist\/\.env/);
 });
 
 check("rsync deletion and remote arguments are constrained", () => {
@@ -102,34 +119,6 @@ check("local preview mirrors route status and MIME contracts", () => {
 check("browser smoke harness supports the workflow Node runtime", () => {
   assert.equal(packageJson.devDependencies.ws, "8.21.3");
   assert.match(browserSmoke, /import WebSocket from "ws"/);
-});
-
-check("current tracked tree has no retired-provider references or credential material", async () => {
-  const { stdout } = await execFileAsync("git", ["ls-files", "-co", "--exclude-standard"]);
-  const retiredProvider = new RegExp(["io", "nos"].join(""), "i");
-  const credentialPatterns = [
-    ["private-key material", new RegExp(["BEGIN", " (?:RSA |OPENSSH |EC )?", "PRIVATE KEY"].join(""))],
-    ["cloud-provider access key", /AKIA[0-9A-Z]{16}/],
-    ["Git hosting token", /gh(?:p|o|u|s|r)_[A-Za-z0-9]{36,}/],
-    ["fine-grained Git hosting token", /github_pat_[A-Za-z0-9_]{40,}/],
-    ["AI service key", /sk-(?:proj-)?[A-Za-z0-9_-]{20,}/],
-    ["CDN credential literal", /(?:CLOUDFLARE|CF)_[A-Z_]*(?:TOKEN|KEY)\s*[:=]\s*["'][A-Za-z0-9_-]{20,}["']/],
-    ["credential literal", /(?:password|secret|token|private[_-]?key)\s*[:=]\s*["'][^"'$\n]{16,}["']/i],
-  ];
-  for (const path of stdout.trim().split("\n").filter(Boolean)) {
-    let contents;
-    try {
-      const fileStats = await lstat(path);
-      if (!fileStats.isFile()) continue;
-      contents = await readFile(path, "utf8");
-    } catch {
-      continue;
-    }
-    assert.doesNotMatch(contents, retiredProvider, `retired provider reference in ${path}`);
-    for (const [label, pattern] of credentialPatterns) {
-      assert.doesNotMatch(contents, pattern, `${label} in ${path}`);
-    }
-  }
 });
 
 await Promise.all(checks);
