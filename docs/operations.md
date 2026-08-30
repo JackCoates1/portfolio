@@ -44,7 +44,7 @@ Configure the CDN equivalently: rewrite only the known client route to `index.ht
 
 ## Deployment and rollback
 
-The workflow runs only after a push to `main`: install, dependency audit, contracts, build, artifact validation, archive attestation, then deployment. It deliberately does not run for pull requests or forks. Action references are full commit SHAs; version comments identify the reviewed release. Checkout does not persist its token, attestation permissions exist only on the isolated attestation job, and the deployment job can only read the uploaded artifact; neither job can modify repository contents.
+The workflow runs only after a push to `main`: install, dependency audit, contracts, build, artifact validation, archive attestation, then deployment. It deliberately does not run for pull requests or forks. Action references are full commit SHAs; version comments identify the reviewed release. Checkout does not persist its token, the build job alone has the OIDC/attestation permissions required to attest its validated archive, and the deployment job can only read the uploaded artifact; it cannot modify repository contents.
 
 The workflow transfers one compressed artifact, verifies both its workflow-provided digest and its internal checksum manifest, and then creates an SSH key file only in the runner temporary directory. It enforces host-key checking, non-interactive SSH, a constrained remote path, protected remote arguments, delayed deletion, and cleanup of temporary key material. This narrows the window for partially updated files, but it is not an atomic release mechanism.
 

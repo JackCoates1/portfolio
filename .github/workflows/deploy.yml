@@ -5,7 +5,7 @@ on:
     branches:
       - main
 
-# Deny the token everything by default. Only the attestation job can mint an OIDC
+# Deny the token everything by default. Only the build job can mint an OIDC
 # token and write an attestation; the deployment job can only read artifacts.
 permissions: {}
 
@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
+      attestations: write
     outputs:
       artifact-digest: ${{ steps.archive-digest.outputs.sha256 }}
 
@@ -83,37 +85,6 @@ jobs:
           retention-days: 1
           compression-level: 0
 
-  attest:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: read
-      id-token: write
-      attestations: write
-
-    steps:
-      # v4.3.0
-      - name: Download deployment artifact for attestation
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
-        with:
-          name: portfolio-dist
-
-      - name: Verify artifact before attestation
-        env:
-          EXPECTED_ARTIFACT_DIGEST: ${{ needs.build.outputs.artifact-digest }}
-        run: |
-          set -eu
-          : "${EXPECTED_ARTIFACT_DIGEST:?artifact digest is required}"
-          test -s portfolio-dist.tar.gz
-          test -s portfolio-dist.tar.gz.sha256
-          sha256sum --check portfolio-dist.tar.gz.sha256
-          read -r actual_digest archive_name < portfolio-dist.tar.gz.sha256
-          test "$archive_name" = "portfolio-dist.tar.gz"
-          test "${#actual_digest}" -eq 64
-          case "$actual_digest" in *[!a-f0-9]*) exit 1 ;; esac
-          test "$actual_digest" = "$EXPECTED_ARTIFACT_DIGEST"
-
       # v1.4.0
       - name: Attest build provenance
         uses: actions/attest-build-provenance@1d7d81b81e4f81c111e59801041513b205b4d6c5
@@ -121,7 +92,7 @@ jobs:
           subject-path: portfolio-dist.tar.gz
 
   deploy:
-    needs: [build, attest]
+    needs: build
     permissions:
       actions: read
     runs-on: ubuntu-latest

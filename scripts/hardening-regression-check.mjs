@@ -38,9 +38,8 @@ check("artifact checksums exclude and verify the checksum manifest", () => {
 
 check("deployment runs without attestation token permissions", () => {
   assert.match(deployWorkflow, /\n  build:\n[\s\S]*?\n    permissions:\n      contents: read\n/);
-  assert.doesNotMatch(deployWorkflow.match(/\n  build:\n[\s\S]*?(?=\n  attest:)/)?.[0] ?? "", /id-token: write|attestations: write/);
-  assert.match(deployWorkflow, /\n  attest:\n    needs: build\n[\s\S]*?\n    permissions:\n      contents: read\n      actions: read\n      id-token: write\n      attestations: write/);
-  assert.match(deployWorkflow, /\n  deploy:\n    needs: \[build, attest\]\n    permissions:\n      actions: read/);
+  assert.match(deployWorkflow, /\n  build:\n[\s\S]*?\n    permissions:\n      contents: read\n      id-token: write\n      attestations: write/);
+  assert.match(deployWorkflow, /\n  deploy:\n    needs: build\n    permissions:\n      actions: read/);
   assert.match(deployWorkflow, /persist-credentials: false/);
 });
 
