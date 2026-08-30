@@ -330,8 +330,15 @@ try {
 } finally {
   client?.close();
   browser.kill("SIGTERM");
-  await Promise.race([once(browser, "exit"), new Promise((resolve) => setTimeout(resolve, 2_000))]);
+  const browserExited = await Promise.race([
+    once(browser, "exit").then(() => true),
+    new Promise((resolve) => setTimeout(() => resolve(false), 2_000)),
+  ]);
+  if (!browserExited) {
+    browser.kill("SIGKILL");
+    await once(browser, "exit").catch(() => {});
+  }
   previewServer.close();
   await once(previewServer, "close");
-  await rm(profilePath, { recursive: true, force: true });
+  await rm(profilePath, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 }
