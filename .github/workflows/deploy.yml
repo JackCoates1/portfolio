@@ -39,7 +39,10 @@ jobs:
         run: npm audit --omit=dev
 
       - name: Run static site contracts
-        run: npm run test:site-contract
+        run: node scripts/site-contract-check.mjs
+
+      - name: Run hardening regression contracts
+        run: node scripts/hardening-regression-check.mjs
 
       - name: Build
         run: npm run build
