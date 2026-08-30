@@ -186,6 +186,9 @@ jobs:
           chmod 600 "$key_file"
           printf '%s\n' "$VPS_HOST ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIARd0kanGEURbQpP7RkBU4e5eZZKR5QNF8pDInyqM6fW" > "$known_hosts"
           ssh_options="-F /dev/null -i $key_file -o UserKnownHostsFile=$known_hosts -o StrictHostKeyChecking=yes -o BatchMode=yes -o IdentitiesOnly=yes"
-          rsync -az --delete-delay --delay-updates --protect-args -e "ssh $ssh_options" \
+          # The deploy key is restricted server-side to command="rrsync $deploy_path"
+          # (see docs/operations.md) -- rrsync maps all paths into that directory itself and
+          # rejects -s/--protect-args as a disabled option, so the destination is left bare.
+          rsync -az --delete-delay --delay-updates -e "ssh $ssh_options" \
             --exclude=security-stats.json --exclude=verified-status.json \
-            dist/ "${VPS_USER}@${VPS_HOST}:${deploy_path}/"
+            dist/ "${VPS_USER}@${VPS_HOST}:"
