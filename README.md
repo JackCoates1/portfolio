@@ -23,7 +23,7 @@ npm run dev
 
 ## Deploy
 
-Push to `main` — GitHub Actions builds and deploys to both IONOS (static hosting) and a VPS running nginx + CrowdSec. See `.github/workflows/deploy.yml`.
+Push to `main` — GitHub Actions builds and deploys to a VPS running nginx + CrowdSec. See `.github/workflows/deploy.yml`.
 
 ### Static-hosting notes
 

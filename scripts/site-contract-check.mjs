@@ -44,4 +44,11 @@ assert.match(indexPage, /href="#main-content"/);
 const cyberLab = await read("src/pages/CyberLab.tsx");
 assert.match(cyberLab, /stun:stun\.l\.google\.com:19302/);
 
+const deployWorkflow = await read(".github/workflows/deploy.yml");
+assert.doesNotMatch(deployWorkflow, /ionos/i, "IONOS deployment leg must not be reintroduced");
+assert.doesNotMatch(deployWorkflow, /lftp/i, "lftp deployment leg must not be reintroduced");
+assert.doesNotMatch(deployWorkflow, /always\(\)/, "deploy steps must not hide failures with always()");
+assert.doesNotMatch(deployWorkflow, /continue-on-error/, "deploy steps must not hide failures with continue-on-error");
+assert.match(deployWorkflow, /VPS_HOST/);
+
 console.log("Static site contract checks passed.");
