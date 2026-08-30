@@ -110,6 +110,7 @@ jobs:
     permissions:
       actions: read
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       # v4.3.0
