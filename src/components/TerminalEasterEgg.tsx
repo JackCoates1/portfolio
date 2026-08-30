@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type {
   ChangeEvent,
   FormEvent,
   KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { Terminal, X } from "lucide-react";
+import { profile } from "@/data/profile";
 
 // Hidden terminal — opens with backtick or the `~` pinned bottom-right,
 // closes with Esc, `exit`, or the ×. Everything it prints is real site
@@ -27,24 +29,17 @@ type CommandResult =
 const PROMPT_USER = "visitor@jackcoates";
 const PROMPT_PATH = ":~$";
 
-const ABOUT_MD = [
-  "I am a cyber security student based in Bradford, UK. Alongside studying I build real things — full-stack web apps, security tools, and infrastructure that actually runs in production.",
-  "",
-  "I run a Proxmox homelab with a k3s cluster, keep production sites live on a VPS, and automate anything that can be automated. If something can be made more secure or more reliable, I will poke at it until it is.",
-].join("\n");
+const ABOUT_MD = profile.about.join("\n\n");
 
-const SKILLS_MD = [
-  "Security:         Wireshark, Metasploit, Nmap, Kali Linux, Pen Testing, DDoS Mitigation, Network Security, Cryptography",
-  "Development:      Python, Node.js, Express, React, TypeScript, Bash, PowerShell, EJS",
-  "Infrastructure:   Linux, Docker, Proxmox, k3s, nginx, Cloudflare, ArgoCD, PM2",
-  "Tools & Services: Git, Stripe, Tailwind CSS, Vite, Brevo, Telegram API, SSH, Certbot",
-].join("\n");
+const SKILLS_MD = profile.skills
+  .map(({ title, skills }) => `${`${title}:`.padEnd(18)}${skills.join(", ")}`)
+  .join("\n");
 
 const CONTACT_MD = [
-  "email:    coatesjack06@gmail.com",
-  "github:   https://github.com/JackCoates1",
-  "linkedin: https://www.linkedin.com/in/jack-coates-a8a430310",
-  "site:     https://jackcoates.co.uk",
+  `email:    ${profile.contact.email}`,
+  `github:   ${profile.contact.github}`,
+  `linkedin: ${profile.contact.linkedin}`,
+  `site:     ${profile.contact.site}`,
 ].join("\n");
 
 const LS_OUTPUT =
@@ -110,7 +105,7 @@ const runCommand = (raw: string): CommandResult => {
         kind: "output",
         lines: [
           {
-            text: "Jack Coates — developer and cyber security student based in Bradford, UK. I build production web apps, security tools, and run a homelab that probably does too much.",
+            text: profile.terminalSummary,
             tone: "default",
           },
         ],
@@ -156,6 +151,18 @@ const TerminalEasterEgg = () => {
   const nextId = useRef(BANNER.length);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+
+  const openTerminal = () => {
+    openerRef.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : triggerRef.current;
+    setOpen(true);
+  };
+
+  const closeTerminal = () => setOpen(false);
 
   const appendCommand = (text: string) => {
     setLines((prev) => [
@@ -192,7 +199,7 @@ const TerminalEasterEgg = () => {
       return;
     }
     if (result.kind === "exit") {
-      setOpen(false);
+      closeTerminal();
       return;
     }
     appendOutput(result.lines);
@@ -225,12 +232,6 @@ const TerminalEasterEgg = () => {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && open) {
-        event.preventDefault();
-        setOpen(false);
-        return;
-      }
-
       const isTrigger = event.key === "`" || event.key === "~";
       if (isTrigger && !open && !event.ctrlKey && !event.metaKey && !event.altKey) {
         const target = event.target as HTMLElement | null;
@@ -242,7 +243,7 @@ const TerminalEasterEgg = () => {
           (target?.isContentEditable ?? false);
         if (isTypingTarget) return;
         event.preventDefault();
-        setOpen(true);
+        openTerminal();
       }
     };
 
@@ -252,17 +253,57 @@ const TerminalEasterEgg = () => {
 
   useEffect(() => {
     if (!open) return;
-    const previous = document.body.style.overflow;
+    const appRoot = document.getElementById("root");
+    const previousOverflow = document.body.style.overflow;
+    const previousAriaHidden = appRoot?.getAttribute("aria-hidden") ?? null;
+    const wasInert = appRoot?.hasAttribute("inert") ?? false;
+    const focusable = 'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])';
+
     document.body.style.overflow = "hidden";
+    appRoot?.setAttribute("inert", "");
+    appRoot?.setAttribute("aria-hidden", "true");
+
+    const focusFrame = requestAnimationFrame(() => inputRef.current?.focus());
+    const onModalKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeTerminal();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const elements = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(focusable) ?? []);
+      if (elements.length === 0) {
+        event.preventDefault();
+        dialogRef.current?.focus();
+        return;
+      }
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onModalKeyDown);
+
     return () => {
-      document.body.style.overflow = previous;
+      cancelAnimationFrame(focusFrame);
+      document.removeEventListener("keydown", onModalKeyDown);
+      document.body.style.overflow = previousOverflow;
+      if (!wasInert) appRoot?.removeAttribute("inert");
+      if (previousAriaHidden === null) appRoot?.removeAttribute("aria-hidden");
+      else appRoot?.setAttribute("aria-hidden", previousAriaHidden);
+      requestAnimationFrame(() => openerRef.current?.focus());
     };
   }, [open]);
 
   useEffect(() => {
     if (open) {
       setInput("");
-      inputRef.current?.focus();
     }
   }, [open]);
 
@@ -273,23 +314,25 @@ const TerminalEasterEgg = () => {
 
   return (
     <>
-      {!open && (
-        <button
+      <button
+          ref={triggerRef}
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={openTerminal}
+          hidden={open}
           aria-label="Open terminal"
           title="open terminal"
           className="fixed bottom-4 right-4 z-40 p-2 font-data text-sm leading-none text-muted-foreground/40 transition-colors hover:text-primary select-none"
         >
           ~
         </button>
-      )}
 
-      {open && (
+      {open && createPortal((
         <div
+          ref={dialogRef}
           role="dialog"
           aria-modal="true"
           aria-label="Terminal"
+          tabIndex={-1}
           className="fixed inset-0 z-[100] flex flex-col bg-background font-data"
         >
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
@@ -306,7 +349,7 @@ const TerminalEasterEgg = () => {
               </span>
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={closeTerminal}
                 aria-label="Close terminal"
                 className="text-muted-foreground transition-colors hover:text-foreground"
               >
@@ -363,7 +406,7 @@ const TerminalEasterEgg = () => {
             />
           </form>
         </div>
-      )}
+      ), document.body)}
     </>
   );
 };

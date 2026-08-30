@@ -2,8 +2,8 @@ import { readdir, stat } from "node:fs/promises";
 
 const assetsDirectory = new URL("../dist/assets/", import.meta.url);
 const budgets = Object.freeze({
-  javascriptFile: 400 * 1024,
-  javascriptTotal: 640 * 1024,
+  javascriptFile: 220 * 1024,
+  javascriptTotal: 400 * 1024,
   stylesheetFile: 28 * 1024,
   stylesheetTotal: 32 * 1024,
 });

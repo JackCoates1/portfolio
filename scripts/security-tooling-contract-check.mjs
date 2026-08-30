@@ -17,7 +17,10 @@ assert.equal(packageJson.scripts["audit:osv"], "node scripts/osv-audit.mjs");
 assert.equal(packageJson.scripts.sbom, "npm sbom --sbom-format=cyclonedx");
 assert.equal(packageJson.scripts["monitor:security"], "node scripts/security-monitor.mjs");
 assert.match(securityMonitor, /"Production security monitor"/);
-assert.match(securityMonitor, /latest deployment, repository-security, and production-monitor runs succeeded/);
+assert.match(securityMonitor, /--current-workflow/);
+assert.match(securityMonitor, /--current-run-id/);
+assert.match(securityMonitor, /recent Actions failures/);
+assert.match(securityMonitor, /latest completed runs for other required workflows succeeded/);
 assert.equal(packageJson.scripts["test:bundle-budget"], "node scripts/bundle-budget-check.mjs");
 await assert.doesNotReject(
   access(new URL("../scripts/bundle-budget-check.mjs", import.meta.url)),
@@ -51,7 +54,7 @@ for (const unusedDependency of [
 const uiFiles = (await readdir(new URL("../src/components/ui/", import.meta.url))).sort();
 assert.deepEqual(uiFiles, ["badge.tsx", "button.tsx", "card.tsx", "skeleton.tsx"]);
 assert.doesNotMatch(hardeningRegression, /git", \["ls-files"/);
-for (const stalePath of ["bun.lockb", "public/placeholder.svg", "src/assets/hero-cyber.jpg", "supabase/config.toml"]) {
+for (const stalePath of ["bun.lockb", "public/placeholder.svg", "src/App.css", "src/assets/hero-cyber.jpg", "supabase/config.toml"]) {
   await assert.rejects(access(new URL(`../${stalePath}`, import.meta.url)), `${stalePath} has no application consumer`);
 }
 
@@ -65,7 +68,10 @@ assert.match(securityWorkflow, /npm run build[\s\S]{0,250}npm run test:bundle-bu
 assert.match(monitoringWorkflow, /schedule:/);
 assert.match(monitoringWorkflow, /workflow_dispatch:/);
 assert.match(monitoringWorkflow, /npm run monitor:security/);
+assert.match(monitoringWorkflow, /--current-workflow "\$MONITOR_CURRENT_WORKFLOW"/);
+assert.match(monitoringWorkflow, /--current-run-id "\$MONITOR_CURRENT_RUN_ID"/);
 assert.match(monitoringWorkflow, /zap-baseline\.py/);
+assert.match(monitoringWorkflow, /ghcr\.io\/zaproxy\/zaproxy:2\.16\.1@sha256:[a-f0-9]{64}/);
 assert.doesNotMatch(monitoringWorkflow, /issues: write|pull-requests: write|continue-on-error/);
 assert.doesNotMatch(monitoringWorkflow, /slack|webhook|send-mail|create-issue/i);
 

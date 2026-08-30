@@ -20,11 +20,21 @@ const packageJson = JSON.parse(await read("package.json"));
 const resume = JSON.parse(await read("public/api/resume"));
 const browserSmoke = await read("scripts/browser-smoke.mjs");
 const indexPage = await read("src/pages/Index.tsx");
+const terminalEasterEgg = await read("src/components/TerminalEasterEgg.tsx");
+const aboutComponent = await read("src/components/About.tsx");
+const skillsComponent = await read("src/components/Skills.tsx");
+const contactComponent = await read("src/components/Contact.tsx");
+const heroComponent = await read("src/components/Hero.tsx");
+const profileData = await read("src/data/profile.ts");
+const securityDashboard = await read("src/components/SecurityDashboard.tsx");
+const verifiedStatus = await read("src/components/VerifiedStatus.tsx");
+const indexCss = await read("src/index.css");
+const nav = await read("src/components/Nav.tsx");
 
 check("explicit consent gates every external Cyber Lab test", () => {
   assert.match(cyberLab, /const \[consentChecked, setConsentChecked\] = useState\(false\)/);
-  assert.match(cyberLab, /if \(externalTestRun === 0\) return;[\s\S]{0,700}fetchGeo\(\)/);
-  assert.match(cyberLab, /if \(externalTestRun === 0\) return;[\s\S]{0,350}getWebRTCLeak\(\)/);
+  assert.match(cyberLab, /if \(externalTestRun === 0\) return;[\s\S]{0,700}fetchGeo\(controller\.signal\)/);
+  assert.match(cyberLab, /if \(externalTestRun === 0\) return;[\s\S]{0,350}getWebRTCLeak\(controller\.signal\)/);
   assert.match(cyberLab, /I consent[^<]*run external network tests/i);
   assert.match(cyberLab, /Google(?:'s)? public STUN\s+service/);
   assert.match(cyberLab, /setConsentChecked\(false\)/);
@@ -36,8 +46,64 @@ check("consented third-party Cyber Lab fetches suppress the referrer", () => {
   for (const provider of ["ipapi.co", "ipwho.is"]) {
     assert.match(cyberLab, new RegExp(`fetchWithTimeout\\([^\\n]*${provider}`));
   }
-  assert.match(cyberLab, /fetchStackIp = async \(version: 4 \| 6\)/);
+  assert.match(cyberLab, /fetchStackIp = async \(version: 4 \| 6, signal: AbortSignal\)/);
   assert.match(cyberLab, /fetchWithTimeout\(`https:\/\/api\$\{version\}\.ipify\.org/);
+});
+
+check("Cyber Lab scopes asynchronous diagnostics to the active run", () => {
+  assert.match(cyberLab, /new AbortController\(\)/);
+  assert.match(cyberLab, /return \(\) => controller\.abort\(\)/);
+  assert.match(cyberLab, /getWebRTCLeak\(controller\.signal\)/);
+  assert.match(cyberLab, /fetchGeo\(controller\.signal\)/);
+});
+
+check("Cyber Lab handles IPv6 ICE candidates and inconclusive results", () => {
+  assert.match(cyberLab, /parseIceCandidateAddress/);
+  assert.match(cyberLab, /candidate\.address/);
+  assert.match(cyberLab, /inconclusive/);
+  assert.doesNotMatch(cyberLab, /No local network addresses leaked via WebRTC — your browser or network/);
+});
+
+check("terminal behaves as a real modal", () => {
+  assert.match(terminalEasterEgg, /createPortal/);
+  assert.match(terminalEasterEgg, /dialogRef/);
+  assert.match(terminalEasterEgg, /focusable/);
+  assert.match(terminalEasterEgg, /setAttribute\("inert", ""\)/);
+  assert.match(terminalEasterEgg, /openerRef\.current\?\.focus\(\)/);
+});
+
+check("profile facts have one typed source", () => {
+  assert.match(profileData, /export interface ProfileData/);
+  assert.match(profileData, /export const profile/);
+  for (const component of [terminalEasterEgg, aboutComponent, skillsComponent, contactComponent, heroComponent]) {
+    assert.match(component, /@\/data\/profile/);
+  }
+  for (const duplicate of ["coatesjack06@gmail.com", "Wireshark", "based in Bradford, UK"]) {
+    for (const component of [terminalEasterEgg, aboutComponent, skillsComponent, contactComponent, heroComponent]) {
+      assert.ok(!component.includes(duplicate), `${duplicate} must only live in profile.ts`);
+    }
+  }
+});
+
+check("security telemetry pauses polling while hidden", () => {
+  for (const component of [securityDashboard, verifiedStatus]) {
+    assert.match(component, /visibilitychange/);
+    assert.match(component, /document\.visibilityState === "visible"/);
+    assert.match(component, /clearInterval/);
+  }
+});
+
+check("the site respects reduced-motion preferences", () => {
+  assert.match(indexCss, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(indexCss, /animation-duration: 0\.01ms !important/);
+  assert.match(indexCss, /scroll-behavior: auto !important/);
+  assert.match(nav, /prefers-reduced-motion: reduce/);
+});
+
+check("security timeline avoids a heavyweight chart runtime", () => {
+  assert.equal(packageJson.dependencies.recharts, undefined);
+  assert.doesNotMatch(securityDashboard, /from "recharts"/);
+  assert.match(securityDashboard, /<svg/);
 });
 
 check("the heavy security dashboard import waits for viewport proximity", () => {

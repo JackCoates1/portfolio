@@ -1,4 +1,5 @@
 import { GraduationCap, Shield, Code, Server } from "lucide-react";
+import { profile } from "@/data/profile";
 
 const About = () => {
   return (
@@ -10,12 +11,11 @@ const About = () => {
         
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div className="space-y-6 animate-fade-in-up">
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              I am a cyber security student based in Bradford, UK. Alongside studying I build real things — full-stack web apps, security tools, and infrastructure that actually runs in production.
-            </p>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              I run a Proxmox homelab with a k3s cluster, keep production sites live on a VPS, and automate anything that can be automated. If something can be made more secure or more reliable, I will poke at it until it is.
-            </p>
+            {profile.about.map((paragraph) => (
+              <p key={paragraph} className="text-lg text-muted-foreground leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
           </div>
 
           <div className="grid gap-6">

@@ -28,26 +28,31 @@ interface GeoInfo {
   timezone?: string;
 }
 
-const fetchWithTimeout = (url: string, ms: number) => {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), ms);
+interface WebRTCLeakResult {
+  ips: string[];
+  inconclusive: boolean;
+}
+
+const fetchWithTimeout = (url: string, ms: number, runSignal: AbortSignal) => {
+  const timeoutSignal = AbortSignal.timeout(ms);
   return fetch(url, {
     referrerPolicy: "no-referrer",
-    signal: controller.signal,
-  }).finally(() => clearTimeout(id));
+    signal: AbortSignal.any([runSignal, timeoutSignal]),
+  });
 };
 
 // ipapi.co's free tier occasionally rate-limits or times out — fall back to a
 // second keyless provider so a single flaky lookup doesn't blank the whole card.
-const fetchGeo = async (): Promise<GeoInfo> => {
+const fetchGeo = async (signal: AbortSignal): Promise<GeoInfo> => {
   try {
-    const res = await fetchWithTimeout("https://ipapi.co/json/", 5000);
+    const res = await fetchWithTimeout("https://ipapi.co/json/", 5000, signal);
     if (!res.ok) throw new Error("primary geo lookup failed");
     const data = await res.json();
     if (data.error) throw new Error("primary geo lookup errored");
     return data;
   } catch {
-    const res = await fetchWithTimeout("https://ipwho.is/", 5000);
+    if (signal.aborted) throw new DOMException("Run cancelled", "AbortError");
+    const res = await fetchWithTimeout("https://ipwho.is/", 5000, signal);
     if (!res.ok) throw new Error("fallback geo lookup failed");
     const data = await res.json();
     if (!data.success) throw new Error("fallback geo lookup errored");
@@ -67,9 +72,9 @@ const fetchGeo = async (): Promise<GeoInfo> => {
 // the IPv4-only and IPv6-only endpoints separately so both (or "not on this
 // network") are always shown explicitly instead of one address looking like
 // a missing field.
-const fetchStackIp = async (version: 4 | 6): Promise<string | null> => {
+const fetchStackIp = async (version: 4 | 6, signal: AbortSignal): Promise<string | null> => {
   try {
-    const res = await fetchWithTimeout(`https://api${version}.ipify.org?format=json`, 3000);
+    const res = await fetchWithTimeout(`https://api${version}.ipify.org?format=json`, 3000, signal);
     if (!res.ok) return null;
     const data = await res.json();
     return data.ip ?? null;
@@ -103,37 +108,68 @@ const parseUserAgent = (ua: string) => {
 // Classic WebRTC local-IP leak: STUN candidates can reveal a device's LAN IP
 // even behind a VPN, because the browser negotiates media candidates outside
 // the tunnel unless the VPN/browser specifically blocks it.
-const getWebRTCLeak = (): Promise<string[]> =>
+const isIpAddress = (value: string) => {
+  const candidate = value.replace(/^\[|\]$/g, "");
+  const ipv4 = candidate.split(".");
+  if (ipv4.length === 4 && ipv4.every((part) => /^\d{1,3}$/.test(part) && Number(part) <= 255)) {
+    return true;
+  }
+  const address = candidate.split("%")[0];
+  if (!address.includes(":") || !/^[0-9a-f:]+$/i.test(address)) return false;
+  if ((address.match(/::/g) ?? []).length > 1) return false;
+  const hextets = address.split(":").filter(Boolean);
+  if (!hextets.every((part) => /^[0-9a-f]{1,4}$/i.test(part))) return false;
+  return address.includes("::") ? hextets.length < 8 : hextets.length === 8;
+};
+
+const parseIceCandidateAddress = (candidate: RTCIceCandidate): string | null => {
+  const structuredAddress = candidate.address?.trim();
+  if (structuredAddress && isIpAddress(structuredAddress)) return structuredAddress;
+
+  // RFC 5245 candidate grammar puts the connection address in field five.
+  // This preserves IPv6 colons instead of searching only for dotted IPv4 text.
+  const serializedAddress = candidate.candidate.trim().split(/\s+/)[4]?.replace(/^\[|\]$/g, "");
+  return serializedAddress && isIpAddress(serializedAddress) ? serializedAddress : null;
+};
+
+const getWebRTCLeak = (signal: AbortSignal): Promise<WebRTCLeakResult> =>
   new Promise((resolve) => {
     const ips = new Set<string>();
     let settled = false;
+    let sawUnparsedCandidate = false;
     let timeout: ReturnType<typeof setTimeout> | undefined;
 
-    const finish = (pc?: RTCPeerConnection) => {
+    const finish = (pc: RTCPeerConnection | undefined, inconclusive = false) => {
       if (settled) return;
       settled = true;
       if (timeout) clearTimeout(timeout);
+      signal.removeEventListener("abort", abortRun);
       pc?.close();
-      resolve(Array.from(ips));
+      resolve({ ips: Array.from(ips), inconclusive: inconclusive || sawUnparsedCandidate });
     };
 
+    let pc: RTCPeerConnection | undefined;
+    const abortRun = () => finish(pc, true);
+    signal.addEventListener("abort", abortRun, { once: true });
+
     try {
-      const pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
+      pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
       pc.createDataChannel("");
       pc.onicecandidate = (event) => {
         if (!event.candidate) {
           finish(pc);
           return;
         }
-        const match = event.candidate.candidate.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/);
-        if (match) ips.add(match[1]);
+        const address = parseIceCandidateAddress(event.candidate);
+        if (address) ips.add(address);
+        else sawUnparsedCandidate = true;
       };
       void pc.createOffer()
         .then((offer) => pc.setLocalDescription(offer))
-        .catch(() => finish(pc));
-      timeout = setTimeout(() => finish(pc), 2000);
+        .catch(() => finish(pc, true));
+      timeout = setTimeout(() => finish(pc, true), 2000);
     } catch {
-      finish();
+      finish(pc, true);
     }
   });
 
@@ -203,32 +239,77 @@ const CyberLab = () => {
   const [externalTestRun, setExternalTestRun] = useState(0);
   const [ipv4, setIpv4] = useState<string | null | undefined>(undefined);
   const [ipv6, setIpv6] = useState<string | null | undefined>(undefined);
-  const [webrtcIps, setWebrtcIps] = useState<string[] | null>(null);
+  const [webrtcResult, setWebrtcResult] = useState<WebRTCLeakResult | null>(null);
   const [canvasHash] = useState(() => getCanvasFingerprint());
   const [typed, setTyped] = useState(false);
 
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setTyped(true);
+      return;
+    }
     const t = setTimeout(() => setTyped(true), 300);
     return () => clearTimeout(t);
   }, []);
 
   useEffect(() => {
+    const previousTitle = document.title;
+    const previousValues = new Map<Element, string | null>();
+    const setContent = (selector: string, content: string) => {
+      const element = document.head.querySelector(selector);
+      if (!element) return;
+      previousValues.set(element, element.getAttribute("content") ?? element.getAttribute("href"));
+      element.setAttribute(element.tagName === "LINK" ? "href" : "content", content);
+    };
+
+    document.title = "Cyber Lab | Jack Coates";
+    setContent('meta[name="description"]', "See what your browser, network, WebRTC, and canvas fingerprint reveal in Jack Coates' consent-based Cyber Lab.");
+    setContent('link[rel="canonical"]', "https://jackcoates.co.uk/cyberlab");
+    setContent('meta[property="og:title"]', "Cyber Lab | Jack Coates");
+    setContent('meta[property="og:description"]', "Run transparent, consent-based browser and network privacy diagnostics.");
+    setContent('meta[property="og:url"]', "https://jackcoates.co.uk/cyberlab");
+
+    return () => {
+      document.title = previousTitle;
+      for (const [element, value] of previousValues) {
+        const attribute = element.tagName === "LINK" ? "href" : "content";
+        if (value === null) element.removeAttribute(attribute);
+        else element.setAttribute(attribute, value);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (externalTestRun === 0) return;
+    const controller = new AbortController();
 
     setGeo(null);
     setGeoError(false);
 
-    fetchGeo()
-      .then(setGeo)
-      .catch(() => setGeoError(true));
+    fetchGeo(controller.signal)
+      .then((data) => {
+        if (!controller.signal.aborted) setGeo(data);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setGeoError(true);
+      });
 
-    fetchStackIp(4).then(setIpv4);
-    fetchStackIp(6).then(setIpv6);
+    fetchStackIp(4, controller.signal).then((address) => {
+      if (!controller.signal.aborted) setIpv4(address);
+    });
+    fetchStackIp(6, controller.signal).then((address) => {
+      if (!controller.signal.aborted) setIpv6(address);
+    });
+    return () => controller.abort();
   }, [externalTestRun]);
 
   useEffect(() => {
     if (externalTestRun === 0) return;
-    getWebRTCLeak().then(setWebrtcIps);
+    const controller = new AbortController();
+    getWebRTCLeak(controller.signal).then((result) => {
+      if (!controller.signal.aborted) setWebrtcResult(result);
+    });
+    return () => controller.abort();
   }, [externalTestRun]);
 
   const startExternalTests = () => {
@@ -237,7 +318,7 @@ const CyberLab = () => {
     setGeoError(false);
     setIpv4(undefined);
     setIpv6(undefined);
-    setWebrtcIps(null);
+    setWebrtcResult(null);
     setExternalTestRun((run) => run + 1);
     setConsentChecked(false);
   };
@@ -402,23 +483,27 @@ const CyberLab = () => {
               <p className="text-sm text-muted-foreground">
                 Waiting for consent. No STUN service has been contacted.
               </p>
-            ) : webrtcIps === null ? (
+            ) : webrtcResult === null ? (
               <div className="space-y-3">
                 <Skeleton className="h-4 w-full" />
                 <Skeleton className="h-4 w-2/3" />
               </div>
-            ) : webrtcIps.length === 0 ? (
+            ) : webrtcResult.inconclusive && webrtcResult.ips.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No local network addresses leaked via WebRTC — your browser or network
-                configuration is blocking this.
+                Inconclusive — the browser returned no parseable ICE address, or candidate
+                gathering timed out. This result does not prove that WebRTC is leak-free.
+              </p>
+            ) : webrtcResult.ips.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Candidate gathering completed without exposing a local network address.
               </p>
             ) : (
               <>
                 <p className="text-xs text-muted-foreground mb-2">
-                  Your local network address{webrtcIps.length > 1 ? "es" : ""}, revealed via
+                  Your local network address{webrtcResult.ips.length > 1 ? "es" : ""}, revealed via
                   WebRTC even if you're behind a VPN:
                 </p>
-                {webrtcIps.map((ip) => (
+                {webrtcResult.ips.map((ip) => (
                   <StatRow key={ip} label="Local IP" value={ip} />
                 ))}
               </>
