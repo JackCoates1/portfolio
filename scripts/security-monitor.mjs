@@ -100,7 +100,8 @@ await record("routes, MIME types, and headers", async () => {
   const routes = [
     ["/", 200, /^text\/html\b/],
     ["/cyberlab", 200, /^text\/html\b/],
-    ["/404.html", 404, /^text\/html\b/],
+    ["/404.html", 200, /^text\/html\b/],
+    ["/monitor-definitely-missing-route", 404, /^text\/html\b/],
     ["/site.webmanifest", 200, /^application\/manifest\+json\b/],
     ["/security.txt", 200, /^text\/plain\b/],
     ["/.well-known/security.txt", 200, /^text\/plain\b/],
