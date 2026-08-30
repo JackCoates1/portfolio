@@ -13,11 +13,13 @@ const notFound = await read("public/404.html");
 const robots = await read("public/robots.txt");
 const manifest = JSON.parse(await read("public/site.webmanifest"));
 const operations = await read("docs/operations.md");
+const app = await read("src/App.tsx");
 
 assert.match(nav, /aria-label=\{open \? "Close navigation menu" : "Open navigation menu"\}/);
 assert.match(nav, /aria-expanded=\{open\}/);
 assert.match(nav, /aria-controls="mobile-navigation"/);
 assert.match(nav, /id="mobile-navigation"/);
+assert.match(nav, /aria-label="Primary navigation"/);
 
 assert.match(
   verifiedStatus,
@@ -75,6 +77,7 @@ assert.match(operations, /frame-ancestors 'none'/);
 assert.match(operations, /upgrade-insecure-requests/);
 assert.match(operations, /location = \/cyberlab/);
 assert.match(operations, /try_files \$uri \$uri\/ =404/);
+assert.match(operations, /Static files never fall back to `index\.html`/);
 
 const indexPage = await read("src/pages/Index.tsx");
 assert.match(indexPage, /<main id="main-content">/);
@@ -82,12 +85,17 @@ assert.match(indexPage, /href="#main-content"/);
 
 const cyberLab = await read("src/pages/CyberLab.tsx");
 assert.match(cyberLab, /stun:stun\.l\.google\.com:19302/);
-assert.match(cyberLab, /const \[externalTestsConsented, setExternalTestsConsented\] = useState\(false\)/);
+assert.match(cyberLab, /const \[consentChecked, setConsentChecked\] = useState\(false\)/);
+assert.match(cyberLab, /const \[externalTestRun, setExternalTestRun\] = useState\(0\)/);
 assert.match(cyberLab, /onClick=\{startExternalTests\}/);
 assert.match(cyberLab, /External network test consent/);
-assert.match(cyberLab, /ipapi\.co,\s+ipwho\.is, and ipify\.org/);
+assert.match(cyberLab, /Local-only mode/);
+assert.match(cyberLab, /<ul[\s\S]*ipapi\.co[\s\S]*ipwho\.is[\s\S]*api4\.ipify\.org[\s\S]*api6\.ipify\.org[\s\S]*stun\.l\.google\.com/);
 assert.match(cyberLab, /Google's public STUN/);
-assert.match(cyberLab, /if \(!externalTestsConsented\) return;/);
+assert.match(cyberLab, /if \(externalTestRun === 0\) return;/);
+assert.match(cyberLab, /setConsentChecked\(false\)/);
+assert.doesNotMatch(cyberLab, /dangerouslySetInnerHTML/);
+assert.match(app, /lazy\(\(\) => import\("\.\/pages\/CyberLab"\)\)/);
 
 const deployWorkflow = await read(".github/workflows/deploy.yml");
 const retiredProviderPattern = new RegExp(["io", "nos"].join(""), "i");

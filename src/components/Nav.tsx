@@ -49,7 +49,7 @@ const Nav = () => {
     : "bg-background/80 backdrop-blur border-border/40";
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${navBg}`}>
+    <nav aria-label="Primary navigation" className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${navBg}`}>
       <div className="container mx-auto px-6 h-14 flex items-center justify-between max-w-6xl">
         <span className="font-bold text-base font-mono text-primary tracking-widest">JC</span>
 

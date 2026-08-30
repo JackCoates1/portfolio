@@ -52,7 +52,29 @@ that is blocked, disable it or configure a nonce—never add `'unsafe-inline'` t
 
 Cyber Lab shows browser-derived data locally. Public IP, approximate-location,
 and WebRTC/STUN tests do not start until the visitor explicitly consents after
-reading which third-party providers receive the requests.
+reading which third-party providers receive the requests. Consent authorizes one
+run and is consumed immediately; retries require a fresh consent action. Staying
+in local-only mode makes no third-party network diagnostic request.
+
+## Security checks
+
+```sh
+npm ci
+npm audit --audit-level=high
+npm run audit:osv
+npm run --silent sbom > sbom.cdx.json
+npm run build
+npm run test:site-contract
+npm run test:preview-contract
+npm run smoke:browser
+npm run lint
+```
+
+The OSV command contacts the public OSV API with locked package names and
+versions only. Repository security and production monitoring workflows are
+read-only, full-SHA pin their Actions, retain SBOM/ZAP reports as artifacts, and
+do not create issues or notifications by default. Monitoring and the remaining
+CDN/VPS-only checks are documented in [the operations guide](docs/operations.md).
 
 ## Stack
 

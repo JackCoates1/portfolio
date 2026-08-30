@@ -50,6 +50,15 @@ const timeAgo = (iso: string) => {
 // github.com/owner/repo reads nicer in the footer than the full https URL
 const stripScheme = (url: string) => url.replace(/^https?:\/\//, "");
 
+const safeHttpsUrl = (value: string | undefined) => {
+  try {
+    const url = new URL(value ?? "");
+    return url.protocol === "https:" ? url.href : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 const VerifiedStatus = () => {
   const [status, setStatus] = useState<VerifiedStatusData | null>(null);
   const [error, setError] = useState(false);
@@ -87,6 +96,11 @@ const VerifiedStatus = () => {
     status?.latest_build.has_attestation === true &&
     status?.latest_build.conclusion === "success";
   const sev = status?.dependency_alerts.by_severity;
+  const repositoryUrl = safeHttpsUrl(status?.repo_url);
+  const commitUrl = repositoryUrl && status
+    ? new URL(`commit/${encodeURIComponent(status.latest_commit.sha)}`, repositoryUrl.endsWith("/") ? repositoryUrl : `${repositoryUrl}/`).href
+    : "#";
+  const buildUrl = safeHttpsUrl(status?.latest_build.run_url) ?? "#";
 
   return (
     <div className="mt-6 bg-card border border-border rounded-lg overflow-hidden card-glow">
@@ -119,7 +133,7 @@ const VerifiedStatus = () => {
               </div>
               {status ? (
                 <a
-                  href={`${status.repo_url}/commit/${status.latest_commit.sha}`}
+                  href={commitUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 font-data text-xs text-foreground hover:text-primary transition-colors"
@@ -161,7 +175,7 @@ const VerifiedStatus = () => {
               {status ? (
                 buildVerified ? (
                   <a
-                    href={status.latest_build.run_url}
+                    href={buildUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 rounded-full border bg-secondary/30 px-2.5 py-1 font-data text-[10px] uppercase tracking-wider transition-colors hover:bg-secondary/60"
@@ -175,7 +189,7 @@ const VerifiedStatus = () => {
                   </a>
                 ) : (
                   <a
-                    href={status.latest_build.run_url}
+                    href={buildUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 font-data text-xs text-foreground hover:text-primary transition-colors"
@@ -253,13 +267,13 @@ const VerifiedStatus = () => {
           </div>
 
           <a
-            href={status?.repo_url ?? "#"}
+            href={repositoryUrl ?? "#"}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 border-t border-border px-4 py-2.5 font-data text-[10px] text-muted-foreground hover:text-primary transition-colors"
           >
             <Github className="h-3 w-3" />
-            <span>{status ? stripScheme(status.repo_url) : "source repository"}</span>
+            <span>{repositoryUrl ? stripScheme(repositoryUrl) : "source repository"}</span>
             {status?.repo_public && (
               <span
                 className="rounded-full border bg-secondary/30 px-2 py-0.5 uppercase tracking-wider"

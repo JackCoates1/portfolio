@@ -1,0 +1,50 @@
+name: Production security monitor
+
+on:
+  schedule:
+    - cron: "41 6 * * 2,5"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-security-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        # v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        # v4.0.4
+        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Check HTTPS, certificate, DNS, headers, routes, CSP, and Actions
+        run: npm run monitor:security -- --url https://jackcoates.co.uk --repository JackCoates1/portfolio
+      - name: Recheck npm and OSV dependency health
+        run: npm audit --audit-level=high && npm run audit:osv
+      - name: Run ZAP passive baseline
+        run: |
+          mkdir -p zap-report
+          docker run --rm --user 0:0 -v "$PWD/zap-report:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:2.16.1 \
+            zap-baseline.py -t https://jackcoates.co.uk -m 2 -I -J report.json -x report.xml
+      - name: Upload passive-scan report
+        if: ${{ always() }}
+        # v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: zap-passive-report
+          path: zap-report/
+          if-no-files-found: warn
+          retention-days: 14
