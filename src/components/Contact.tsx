@@ -1,5 +1,6 @@
 import { Mail, Linkedin, Github } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { profile } from "@/data/profile";
 
 const Contact = () => {
   return (
@@ -14,19 +15,19 @@ const Contact = () => {
 
         <div className="grid sm:grid-cols-3 gap-4 max-w-lg mx-auto">
           <Button variant="outline" className="h-auto py-6 flex flex-col items-center gap-3 card-glow" asChild>
-            <a href="mailto:coatesjack06@gmail.com">
+            <a href={`mailto:${profile.contact.email}`}>
               <Mail className="h-8 w-8 text-primary" />
               <span className="text-sm">Email</span>
             </a>
           </Button>
           <Button variant="outline" className="h-auto py-6 flex flex-col items-center gap-3 card-glow" asChild>
-            <a href="https://www.linkedin.com/in/jack-coates-a8a430310" target="_blank" rel="noopener noreferrer">
+            <a href={profile.contact.linkedin} target="_blank" rel="noopener noreferrer">
               <Linkedin className="h-8 w-8 text-primary" />
               <span className="text-sm">LinkedIn</span>
             </a>
           </Button>
           <Button variant="outline" className="h-auto py-6 flex flex-col items-center gap-3 card-glow" asChild>
-            <a href="https://github.com/JackCoates1" target="_blank" rel="noopener noreferrer">
+            <a href={profile.contact.github} target="_blank" rel="noopener noreferrer">
               <Github className="h-8 w-8 text-primary" />
               <span className="text-sm">GitHub</span>
             </a>

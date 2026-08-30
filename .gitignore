@@ -26,3 +26,6 @@ dist-ssr
 # Env files — VITE_ vars ship in the client bundle regardless (by design,
 # Supabase anon key), but don't commit the file itself as a matter of hygiene
 .env
+tsconfig.*.tsbuildinfo
+dist/
+node_modules/

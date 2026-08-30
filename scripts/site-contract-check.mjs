@@ -95,6 +95,11 @@ assert.match(cyberLab, /Google's public STUN/);
 assert.match(cyberLab, /if \(externalTestRun === 0\) return;/);
 assert.match(cyberLab, /setConsentChecked\(false\)/);
 assert.doesNotMatch(cyberLab, /dangerouslySetInnerHTML/);
+assert.match(cyberLab, /Cyber Lab \| Jack Coates/);
+assert.match(cyberLab, /https:\/\/jackcoates\.co\.uk\/cyberlab/);
+for (const property of ["description", "og:title", "og:description", "og:url"]) {
+  assert.ok(cyberLab.includes(property), `Cyber Lab must manage ${property} metadata`);
+}
 assert.match(app, /lazy\(\(\) => import\("\.\/pages\/CyberLab"\)\)/);
 
 const deployWorkflow = await read(".github/workflows/deploy.yml");

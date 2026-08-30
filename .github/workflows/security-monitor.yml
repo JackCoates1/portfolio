@@ -31,13 +31,21 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
       - name: Check HTTPS, certificate, DNS, headers, routes, CSP, and Actions
-        run: npm run monitor:security -- --url https://jackcoates.co.uk --repository JackCoates1/portfolio
+        env:
+          MONITOR_CURRENT_WORKFLOW: ${{ github.workflow }}
+          MONITOR_CURRENT_RUN_ID: ${{ github.run_id }}
+        run: >-
+          npm run monitor:security --
+          --url https://jackcoates.co.uk
+          --repository JackCoates1/portfolio
+          --current-workflow "$MONITOR_CURRENT_WORKFLOW"
+          --current-run-id "$MONITOR_CURRENT_RUN_ID"
       - name: Recheck npm and OSV dependency health
         run: npm audit --audit-level=high && npm run audit:osv
       - name: Run ZAP passive baseline
         run: |
           mkdir -p zap-report
-          docker run --rm --user 0:0 -v "$PWD/zap-report:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:2.16.1 \
+          docker run --rm --user 0:0 -v "$PWD/zap-report:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:2.16.1@sha256:7840969c7c9fead565bf9734b12f49f6886db90b1d35b1f74d79710bbd081dab \
             zap-baseline.py -t https://jackcoates.co.uk -m 2 -I -J report.json -x report.xml
       - name: Upload passive-scan report
         if: ${{ always() }}

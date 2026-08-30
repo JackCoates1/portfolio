@@ -1,15 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Shield, ShieldAlert, Globe2, Activity, Radio } from "lucide-react";
 import AttackReplay, { type NotableReplay } from "@/components/AttackReplay";
 import VerifiedStatus from "@/components/VerifiedStatus";
-import {
-  AreaChart,
-  Area,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
+
 
 interface ScenarioCount {
   scenario: string;
@@ -61,6 +54,53 @@ const formatHourFull = (iso: string) => {
   });
 };
 
+const TimelineChart = ({ data }: { data: TimelinePoint[] }) => {
+  const gradientId = `timeline-fill-${useId().replace(/:/g, "")}`;
+  if (data.length === 0) {
+    return <p className="flex h-full items-center justify-center font-data text-xs text-muted-foreground">awaiting data…</p>;
+  }
+
+  const width = 640;
+  const height = 208;
+  const padding = { top: 12, right: 10, bottom: 30, left: 34 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+  const max = Math.max(1, ...data.map(({ count }) => count));
+  const x = (index: number) => padding.left + (data.length === 1 ? chartWidth / 2 : (index / (data.length - 1)) * chartWidth);
+  const y = (count: number) => padding.top + chartHeight - (count / max) * chartHeight;
+  const points = data.map((point, index) => `${x(index)},${y(point.count)}`).join(" ");
+  const areaPoints = `${padding.left},${padding.top + chartHeight} ${points} ${padding.left + chartWidth},${padding.top + chartHeight}`;
+  const labelIndexes = [...new Set([0, Math.floor((data.length - 1) / 2), data.length - 1])];
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="h-full w-full" role="img" aria-label="Blocked requests over time">
+      <title>Threat timeline. Hover or focus a point for its value.</title>
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="hsl(var(--status-info))" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="hsl(var(--status-info))" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <line x1={padding.left} y1={padding.top} x2={padding.left} y2={padding.top + chartHeight} stroke="hsl(var(--border))" />
+      <line x1={padding.left} y1={padding.top + chartHeight} x2={padding.left + chartWidth} y2={padding.top + chartHeight} stroke="hsl(var(--border))" />
+      <text x={padding.left - 8} y={padding.top + 4} textAnchor="end" className="fill-muted-foreground text-[10px]">{max}</text>
+      <text x={padding.left - 8} y={padding.top + chartHeight + 4} textAnchor="end" className="fill-muted-foreground text-[10px]">0</text>
+      <polygon points={areaPoints} fill={`url(#${gradientId})`} />
+      <polyline points={points} fill="none" stroke="hsl(var(--status-info))" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+      {data.map((point, index) => (
+        <circle key={point.hour} cx={x(index)} cy={y(point.count)} r="4" fill="hsl(var(--status-info))" tabIndex={0} className="opacity-0 focus:opacity-100 hover:opacity-100">
+          <title>{`${formatHourFull(point.hour)}: ${point.count} blocked`}</title>
+        </circle>
+      ))}
+      {labelIndexes.map((index) => (
+        <text key={data[index].hour} x={x(index)} y={height - 8} textAnchor={index === 0 ? "start" : index === data.length - 1 ? "end" : "middle"} className="fill-muted-foreground text-[10px]">
+          {formatHour(data[index].hour)}
+        </text>
+      ))}
+    </svg>
+  );
+};
+
 const timeAgo = (iso: string) => {
   const diffMs = Date.now() - new Date(iso).getTime();
   const mins = Math.round(diffMs / 60000);
@@ -75,29 +115,47 @@ const SecurityDashboard = () => {
 
   useEffect(() => {
     let cancelled = false;
+    let interval: ReturnType<typeof setInterval> | undefined;
+    let request: AbortController | undefined;
 
     const load = () => {
-      fetch("/security-stats.json", { cache: "no-store" })
+      request?.abort();
+      const controller = new AbortController();
+      request = controller;
+      fetch("/security-stats.json", { cache: "no-store", signal: controller.signal })
         .then((res) => {
           if (!res.ok) throw new Error("bad response");
           return res.json();
         })
         .then((data: SecurityStats) => {
-          if (!cancelled) {
+          if (!cancelled && !controller.signal.aborted) {
             setStats(data);
             setError(false);
           }
         })
-        .catch(() => {
-          if (!cancelled) setError(true);
+        .catch((cause: unknown) => {
+          if (!cancelled && (!(cause instanceof DOMException) || cause.name !== "AbortError")) setError(true);
         });
     };
 
-    load();
-    const interval = setInterval(load, 60_000);
+    const updatePolling = () => {
+      if (interval) clearInterval(interval);
+      interval = undefined;
+      if (document.visibilityState === "visible") {
+        load();
+        interval = setInterval(load, 60_000);
+      } else {
+        request?.abort();
+      }
+    };
+
+    document.addEventListener("visibilitychange", updatePolling);
+    updatePolling();
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      request?.abort();
+      if (interval) clearInterval(interval);
+      document.removeEventListener("visibilitychange", updatePolling);
     };
   }, []);
 
@@ -159,51 +217,7 @@ const SecurityDashboard = () => {
                 <span className="label-micro">Threat Timeline</span>
               </div>
               <div className="h-52">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={stats?.timeline ?? []} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="timelineFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="hsl(var(--status-info))" stopOpacity={0.35} />
-                        <stop offset="100%" stopColor="hsl(var(--status-info))" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis
-                      dataKey="hour"
-                      tickFormatter={formatHour}
-                      stroke="hsl(var(--muted-foreground))"
-                      fontSize={10}
-                      tickLine={false}
-                      axisLine={false}
-                      minTickGap={60}
-                    />
-                    <YAxis
-                      stroke="hsl(var(--muted-foreground))"
-                      fontSize={10}
-                      tickLine={false}
-                      axisLine={false}
-                      width={24}
-                      allowDecimals={false}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        background: "hsl(var(--popover))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: 6,
-                        fontSize: 12,
-                        fontFamily: "ui-monospace, monospace",
-                      }}
-                      labelFormatter={(v) => formatHourFull(v as string)}
-                      formatter={(v: number) => [v, "blocked"]}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="count"
-                      stroke="hsl(var(--status-info))"
-                      strokeWidth={1.5}
-                      fill="url(#timelineFill)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+                <TimelineChart data={stats?.timeline ?? []} />
               </div>
             </div>
 

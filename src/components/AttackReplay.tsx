@@ -172,6 +172,10 @@ const AttackReplay = ({ replay }: AttackReplayProps) => {
   const startReplay = () => {
     timersRef.current.forEach((id) => window.clearTimeout(id));
     timersRef.current = [];
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setActiveStage(stages.length);
+      return;
+    }
     setActiveStage(0);
 
     stages.forEach((_, index) => {

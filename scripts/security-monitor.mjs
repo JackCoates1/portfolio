@@ -9,7 +9,7 @@ const option = (name) => {
 };
 
 if (args.includes("--help")) {
-  console.log("Usage: npm run monitor:security -- --url https://example.test [--repository owner/repo] [--origin-host origin.example.test]");
+  console.log("Usage: npm run monitor:security -- --url https://example.test [--repository owner/repo] [--origin-host origin.example.test] [--current-workflow name] [--current-run-id id]");
   process.exit(0);
 }
 
@@ -127,32 +127,66 @@ await record("routes, MIME types, and headers", async () => {
 
 const repository = option("--repository");
 if (repository) {
-  await record("Actions status", async () => {
-    assert.match(repository, /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/, "--repository must be owner/name");
-    const response = await fetch(`https://api.github.com/repos/${repository}/actions/workflows?per_page=100`, {
-      headers: { Accept: "application/vnd.github+json", "User-Agent": "portfolio-security-monitor/1" },
+  const currentWorkflow = option("--current-workflow");
+  const currentRunId = option("--current-run-id");
+  if (currentRunId) assert.match(currentRunId, /^\d+$/, "--current-run-id must be numeric");
+
+  const actionsHeaders = {
+    Accept: "application/vnd.github+json",
+    "User-Agent": "portfolio-security-monitor/1",
+    "X-GitHub-Api-Version": "2022-11-28",
+  };
+  const fetchActions = async (path, label) => {
+    const response = await fetch(`https://api.github.com/repos/${repository}${path}`, {
+      headers: actionsHeaders,
       signal: AbortSignal.timeout(15_000),
     });
-    assert.equal(response.status, 200, `public Actions API returned HTTP ${response.status}`);
-    const body = await response.json();
-    for (const workflowName of ["Build, attest, and deploy to VPS", "Repository security", "Production security monitor"]) {
+    assert.equal(response.status, 200, `${label} returned HTTP ${response.status}`);
+    return response.json();
+  };
+
+  await record("Actions status", async () => {
+    assert.match(repository, /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/, "--repository must be owner/name");
+    const body = await fetchActions("/actions/workflows?per_page=100", "public Actions API");
+    const requiredWorkflows = [
+      "Build, attest, and deploy to VPS",
+      "Repository security",
+      "Production security monitor",
+    ].filter((workflowName) => workflowName !== currentWorkflow);
+
+    for (const workflowName of requiredWorkflows) {
       const workflow = body.workflows?.find((candidate) => candidate.name === workflowName);
       assert.ok(workflow, `${workflowName} workflow was not found`);
-      const runsResponse = await fetch(
-        `https://api.github.com/repos/${repository}/actions/workflows/${workflow.id}/runs?status=completed&per_page=1`,
-        {
-          headers: { Accept: "application/vnd.github+json", "User-Agent": "portfolio-security-monitor/1" },
-          signal: AbortSignal.timeout(15_000),
-        },
+      const runs = await fetchActions(
+        `/actions/workflows/${workflow.id}/runs?status=completed&per_page=10`,
+        `${workflowName} runs API`,
       );
-      assert.equal(runsResponse.status, 200, `${workflowName} runs API returned HTTP ${runsResponse.status}`);
-      const runs = await runsResponse.json();
-      const run = runs.workflow_runs?.[0];
+      const run = runs.workflow_runs?.find((candidate) => String(candidate.id) !== currentRunId);
       assert.ok(run, `no completed ${workflowName} run found`);
       assert.equal(run.conclusion, "success", `latest ${workflowName} run concluded ${run.conclusion}`);
       assert.ok(Date.now() - Date.parse(run.updated_at) < 15 * 86_400_000, `${workflowName} has not completed recently`);
     }
-    return "latest deployment, repository-security, and production-monitor runs succeeded";
+    return "latest completed runs for other required workflows succeeded";
+  });
+
+  await record("recent Actions failures", async () => {
+    const recentThreshold = Date.now() - 15 * 86_400_000;
+    const body = await fetchActions(
+      "/actions/runs?status=completed&per_page=100",
+      "recent Actions runs API",
+    );
+    const failedConclusions = new Set(["action_required", "failure", "startup_failure", "timed_out"]);
+    const recentFailures = (body.workflow_runs ?? []).filter((run) =>
+      run.name !== currentWorkflow
+      && String(run.id) !== currentRunId
+      && Date.parse(run.updated_at) >= recentThreshold
+      && failedConclusions.has(run.conclusion));
+    assert.deepEqual(
+      recentFailures,
+      [],
+      `found ${recentFailures.length}: ${recentFailures.map((run) => `${run.name} #${run.run_number} (${run.html_url})`).join(", ")}`,
+    );
+    return "none in the last 15 days outside this monitor workflow";
   });
 } else {
   notes.push("SKIP Actions status: pass --repository owner/name for a public repository");

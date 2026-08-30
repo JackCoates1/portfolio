@@ -65,29 +65,47 @@ const VerifiedStatus = () => {
 
   useEffect(() => {
     let cancelled = false;
+    let interval: ReturnType<typeof setInterval> | undefined;
+    let request: AbortController | undefined;
 
     const load = () => {
-      fetch("/verified-status.json", { cache: "no-store" })
+      request?.abort();
+      const controller = new AbortController();
+      request = controller;
+      fetch("/verified-status.json", { cache: "no-store", signal: controller.signal })
         .then((res) => {
           if (!res.ok) throw new Error("bad response");
           return res.json();
         })
         .then((data: VerifiedStatusData) => {
-          if (!cancelled) {
+          if (!cancelled && !controller.signal.aborted) {
             setStatus(data);
             setError(false);
           }
         })
-        .catch(() => {
-          if (!cancelled) setError(true);
+        .catch((cause: unknown) => {
+          if (!cancelled && (!(cause instanceof DOMException) || cause.name !== "AbortError")) setError(true);
         });
     };
 
-    load();
-    const interval = setInterval(load, POLL_MS);
+    const updatePolling = () => {
+      if (interval) clearInterval(interval);
+      interval = undefined;
+      if (document.visibilityState === "visible") {
+        load();
+        interval = setInterval(load, POLL_MS);
+      } else {
+        request?.abort();
+      }
+    };
+
+    document.addEventListener("visibilitychange", updatePolling);
+    updatePolling();
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      request?.abort();
+      if (interval) clearInterval(interval);
+      document.removeEventListener("visibilitychange", updatePolling);
     };
   }, []);
 

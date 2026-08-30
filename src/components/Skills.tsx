@@ -1,25 +1,7 @@
 import { Badge } from "@/components/ui/badge";
+import { profile } from "@/data/profile";
 
 const Skills = () => {
-  const skillCategories = [
-    {
-      title: "Security",
-      skills: ["Wireshark", "Metasploit", "Nmap", "Kali Linux", "Pen Testing", "DDoS Mitigation", "Network Security", "Cryptography"]
-    },
-    {
-      title: "Development",
-      skills: ["Python", "Node.js", "Express", "React", "TypeScript", "Bash", "PowerShell", "EJS"]
-    },
-    {
-      title: "Infrastructure",
-      skills: ["Linux", "Docker", "Proxmox", "k3s", "nginx", "Cloudflare", "ArgoCD", "PM2"]
-    },
-    {
-      title: "Tools & Services",
-      skills: ["Git", "Stripe", "Tailwind CSS", "Vite", "Brevo", "Telegram API", "SSH", "Certbot"]
-    }
-  ];
-
   return (
     <section id="skills" className="py-20 px-4 bg-secondary/30">
       <div className="container mx-auto max-w-6xl">
@@ -28,7 +10,7 @@ const Skills = () => {
         </h2>
 
         <div className="grid md:grid-cols-2 gap-8">
-          {skillCategories.map((category, index) => (
+          {profile.skills.map((category, index) => (
             <div 
               key={category.title}
               className="bg-card border border-border rounded-lg p-6 card-glow animate-fade-in-up"
