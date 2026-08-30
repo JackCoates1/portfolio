@@ -99,9 +99,9 @@ jobs:
           retention-days: 1
           compression-level: 0
 
-      # v1.4.0
+      # v4.2.2
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@1d7d81b81e4f81c111e59801041513b205b4d6c5
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
         with:
           subject-path: portfolio-dist.tar.gz
 
