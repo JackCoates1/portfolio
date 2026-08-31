@@ -62,7 +62,7 @@ export const createPreviewServer = async ({ root = DEFAULT_ROOT } = {}) => {
       const requestedRelativePath = isBrowserRoute ? "index.html" : requestPath.replace(/^\/+/, "");
       const candidatePath = resolve(rootPath, requestedRelativePath);
       let filePath;
-      let statusCode = requestPath === "/404.html" ? 404 : 200;
+      let statusCode = 200; // /404.html is a real static file -- a direct hit returns 200, matching production nginx (error_page only fires on an actual unknown route)
 
       if (requestedRelativePath && isInside(rootPath, candidatePath)) {
         try {
