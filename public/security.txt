@@ -1,5 +1,6 @@
 Contact: mailto:coatesjack06@gmail.com
 Preferred-Languages: en
 Canonical: https://jackcoates.co.uk/.well-known/security.txt
+Canonical: https://jackcoates.co.uk/security.txt
 Policy: https://jackcoates.co.uk/#contact
 Expires: 2027-08-23T00:00:00.000Z
