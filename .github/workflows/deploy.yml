@@ -54,6 +54,11 @@ jobs:
       - name: Run production-like route contracts
         run: npm run test:preview-contract
 
+      - name: Install Chromium for browser smoke test
+        run: |
+          npx --yes playwright@1.62.1 install --with-deps chromium
+          echo "CHROMIUM_BIN=$(find $HOME/.cache/ms-playwright -type f -name chrome -path '*chrome-linux*' | head -1)" >> "$GITHUB_ENV"
+
       - name: Run Chromium security regressions
         run: npm run smoke:browser
 
