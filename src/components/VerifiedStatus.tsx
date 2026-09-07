@@ -138,8 +138,9 @@ const VerifiedStatus = () => {
       </div>
 
       <p className="px-4 pt-3 text-xs text-muted-foreground max-w-3xl">
-        Proof the code running this site is actually what's in the repo, and
-        hasn't been swapped or tampered with between commit and deploy.
+        Live signals for the commit and build actually running this site --
+        signature, build attestation and dependency health -- shown as-is,
+        not a standing guarantee they're all green right now.
       </p>
 
           <div className="grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border">

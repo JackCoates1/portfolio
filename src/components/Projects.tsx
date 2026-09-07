@@ -7,14 +7,14 @@ const Projects = () => {
   const projects = [
     {
       title: "This Portfolio",
-      description: "The site you're looking at. React/Vite SPA with a live CrowdSec security dashboard fed by real traffic, a replay of an actual blocked attack, and GPG-signed, build-attested deploys.",
+      description: "The site you're looking at. React/Vite SPA with a live CrowdSec security dashboard fed by real traffic, a replay of an actual blocked attack, and a live panel showing this commit's real GPG signature and build-attestation status.",
       tags: ["React", "TypeScript", "Vite", "CrowdSec"],
       github: "https://github.com/JackCoates1/portfolio",
       live: "https://jackcoates.co.uk",
     },
     {
       title: "MaxsReviews",
-      description: "Full-stack e-commerce site for digital review products. Node/Express backend, Stripe payments, Brevo email, subscriber management, and a full admin panel.",
+      description: "Full-stack e-commerce site for a single-product apparel drop. Node/Express backend, Stripe payments, Brevo email, subscriber management, and a full admin panel.",
       tags: ["Node.js", "Express", "Stripe", "EJS"],
       github: null,
       live: "https://maxsreviews.co.uk",
@@ -42,8 +42,8 @@ const Projects = () => {
     },
     {
       title: "Homelab Infrastructure",
-      description: "A physical Proxmox rack (mini PCs + Raspberry Pis) running k3s, ArgoCD, and Docker, plus a VPS that hosts this site and my other production apps. Cloudflare-fronted, with CrowdSec watching real traffic and blocking attacks at the firewall — the live feed above is that system, not a demo.",
-      tags: ["Proxmox", "k3s", "CrowdSec", "Cloudflare"],
+      description: "A physical Proxmox rack (mini PCs + Raspberry Pis) running LXC containers and VMs for services like MeshCentral and AI tooling, plus a VPS that hosts this site and my other production apps. Cloudflare-fronted, with CrowdSec watching real traffic and blocking attacks at the firewall — the live feed above is that system, not a demo.",
+      tags: ["Proxmox", "Docker", "CrowdSec", "Cloudflare"],
       github: null,
       live: null,
     },

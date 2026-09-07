@@ -27,7 +27,7 @@ const About = () => {
                 <div>
                   <h3 className="font-semibold text-lg mb-2">Education</h3>
                   <p className="text-muted-foreground">
-                    Bachelor&apos;s in Cyber Security
+                    Studying for a Bachelor&apos;s in Cyber Security
                   </p>
                 </div>
               </div>
@@ -69,7 +69,7 @@ const About = () => {
                 <div>
                   <h3 className="font-semibold text-lg mb-2">Infrastructure</h3>
                   <p className="text-muted-foreground">
-                    Linux, Docker, Proxmox, k3s, nginx, Cloudflare
+                    Linux, Docker, Proxmox, nginx, Cloudflare
                   </p>
                 </div>
               </div>
