@@ -41,3 +41,9 @@ DONE: implemented and visually reviewed exploration, tablet fix, validation evid
 - Follow-up branch improve/portfolio-motion-ci-2026-09-08: remember explicit pause across reload/navigation; OS reduced motion remains respected; blocked storage never breaks controls. Added browser regressions for persistence, OS changes and denied storage.
 - Added telemetry and actual WebGL/accessibility regressions to the existing deployment build job. Updated old exploration wording for production. No transport, deployment credentials, permissions or production services changed.
 - Follow-up local production build, lint, TypeScript, data tests, bundle budget and extended browser suite passed. Existing security smoke rerun before publishing.
+
+## Phone feedback — mobile globe fix
+- Reproduced Jack’s mobile issue using real Chromium touch input: `touch-action: pan-y` lets vertical/diagonal gestures become browser scrolling and cancels the pointer stream. Existing desktop-only drag tests had missed it.
+- Canvas now owns touch gestures, rotates in both axes without the former vertical clamp, tracks the active pointer, and clears drag on lost capture. The surrounding page remains scrollable; an inline hint explains the boundary.
+- New real-touch regression fails before the fix and passes afterward for horizontal, vertical and diagonal drags; asserts no scroll/cancel and changed WebGL output. Added to deployment CI. Local build/lint and existing globe/accessibility checks pass.
+- CV investigation: homepage links directly to raw JSON; no human-readable resume component exists. Next release will add a proper printable presentation while retaining the machine-readable endpoint.

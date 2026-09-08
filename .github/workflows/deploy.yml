@@ -68,6 +68,9 @@ jobs:
       - name: Run globe and accessibility regressions
         run: npm run test:redesign-browser
 
+      - name: Run real mobile touch regressions
+        run: npm run test:mobile-globe
+
       - name: Validate and package deployment artifact
         id: archive-digest
         run: |

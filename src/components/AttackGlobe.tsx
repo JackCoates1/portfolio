@@ -259,26 +259,26 @@ export default function AttackGlobe({
     resize.observe(host);
     const raycaster = new THREE.Raycaster(),
       pointer = new THREE.Vector2();
-    let down: { x: number; y: number; distance: number } | null = null;
+    let down: { pointerId: number; x: number; y: number; distance: number } | null = null;
     const onDown = (e: PointerEvent) => {
-      down = { x: e.clientX, y: e.clientY, distance: 0 };
+      if (down || !e.isPrimary || (e.pointerType === "mouse" && e.button !== 0)) return;
+      e.preventDefault();
+      down = { pointerId: e.pointerId, x: e.clientX, y: e.clientY, distance: 0 };
       canvas.setPointerCapture(e.pointerId);
     };
     const onMove = (e: PointerEvent) => {
-      if (!down) return;
+      if (!down || down.pointerId !== e.pointerId) return;
       const dx = e.clientX - down.x,
         dy = e.clientY - down.y;
       dirty = true;
       world.rotation.y += dx * 0.006;
-      world.rotation.x = Math.max(
-        -1.2,
-        Math.min(1.2, world.rotation.x + dy * 0.004),
-      );
+      world.rotation.x += dy * 0.006;
       down.distance += Math.abs(dx) + Math.abs(dy);
       down.x = e.clientX;
       down.y = e.clientY;
     };
     const onUp = (e: PointerEvent) => {
+      if (!down || down.pointerId !== e.pointerId) return;
       if (down && down.distance < 6) {
         const rect = canvas.getBoundingClientRect();
         pointer.set(
@@ -295,8 +295,8 @@ export default function AttackGlobe({
       }
       down = null;
     };
-    const onCancel = () => {
-      down = null;
+    const onCancel = (e: PointerEvent) => {
+      if (down?.pointerId === e.pointerId) down = null;
     };
     const onLost = (e: Event) => {
       e.preventDefault();
@@ -307,6 +307,7 @@ export default function AttackGlobe({
     canvas.addEventListener("pointermove", onMove);
     canvas.addEventListener("pointerup", onUp);
     canvas.addEventListener("pointercancel", onCancel);
+    canvas.addEventListener("lostpointercapture", onCancel);
     canvas.addEventListener("webglcontextlost", onLost);
     function tick(time: number) {
       raf = requestAnimationFrame(tick);
@@ -361,6 +362,7 @@ export default function AttackGlobe({
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerup", onUp);
       canvas.removeEventListener("pointercancel", onCancel);
+      canvas.removeEventListener("lostpointercapture", onCancel);
       canvas.removeEventListener("webglcontextlost", onLost);
       scene.traverse((o) => {
         const m = o as THREE.Mesh;

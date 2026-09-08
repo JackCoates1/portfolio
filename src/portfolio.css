@@ -239,7 +239,7 @@
   height: 100%;
   width: 100%;
   cursor: grab;
-  touch-action: pan-y;
+  touch-action: none;
 }
 .globe-stage:active {
   cursor: grabbing;
@@ -954,3 +954,6 @@
     gap: 18px;
   }
 }
+
+.globe-stage canvas { touch-action: none; user-select: none; -webkit-user-select: none; }
+.globe-touch-hint { font: 10px/1.5 Plex,monospace; color: var(--dim); margin: 8px 0 0; }

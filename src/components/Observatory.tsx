@@ -108,6 +108,7 @@ export default function Observatory({
           </button>
         </div>
       </div>
+      <p className="globe-touch-hint">Drag the globe in any direction. Scroll outside it to move down the page.</p>
       {feed && snapshot && (
         <>
           <div className="telemetry-readout">

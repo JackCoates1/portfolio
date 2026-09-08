@@ -17,7 +17,8 @@
     "sbom": "npm sbom --sbom-format=cyclonedx",
     "monitor:security": "node scripts/security-monitor.mjs",
     "test:telemetry": "node --test scripts/telemetry/*.test.mjs && python3 -m unittest discover -s scripts/telemetry -p 'test_*.py'",
-    "test:redesign-browser": "node scripts/redesign-browser.mjs"
+    "test:redesign-browser": "node scripts/redesign-browser.mjs",
+    "test:mobile-globe": "node scripts/mobile-globe.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
