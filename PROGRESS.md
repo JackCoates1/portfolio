@@ -1,0 +1,34 @@
+# Cyber globe portfolio — running log
+
+Current status: reviewed exploration complete; final validation and critique below. Branch `redesign/cyber-globe-2026-09-07`, worktree `/root/portfolio-cyber-globe`. No deployment.
+
+## 2026-09-08 — discovery
+- Full brief recovered; fresh bare clone `/root/portfolio-redesign.git`, worktree `/root/portfolio-cyber-globe`, branch `redesign/cyber-globe-2026-09-07`, base `fac0f4e` (current remote main).
+- Earlier unfinished branch `/root/jackcoates-portfolio-astra` preserved untouched. This is a new exploration.
+- Current app: React/Vite (Supabase no longer in active dependency list), six projects in Projects.tsx. Deploy workflow only runs on main. No push/deploy performed.
+- Actual OPNsense CrowdSec queried read-only through existing trusted Pi/Tailscale SSH route. 31 stored alerts, all private source addresses (mostly internal SSH automation), therefore **none qualify as external attack origins**. Community decisions must not substitute for local events.
+- Suricata EVE snapshot collected read-only into private cache, classification under investigation. No raw logs or private addresses enter public assets.
+- Existing security/browser/static-route/bundle contracts inventoried. Preserve Cyber Lab consent behavior and security headers.
+- Next: finish source validation and real asset inventory; render three design directions, choose and document system, then implement.
+
+## State
+IN FLIGHT: discovery/design/data. BLOCKED: none; real homelab external detections not yet established. DONE: isolated branch and authenticated read-only telemetry access.
+
+## Design and first implementation
+- Three rendered design directions in `docs/design/directions.html` and `docs/design/direction-{1,2,3}.png`. Chose Signal Observatory; rationale and tokens in DESIGN.md.
+- Five actual public site/repository captures are locally hosted WebP previews. Homelab will use explicitly labelled documented architecture, not an invented dashboard or unrelated client screenshot.
+- Sanitized historical dataset captured 2026-09-08: 200 VPS local CrowdSec alerts / 45 geographic groups / 21 countries; 4 public-source homelab firewall blocks / 2 geographic groups. Actual homelab CrowdSec had 31 private-source alerts; sampled Suricata had zero alerts. Both excluded from attack claims. IPs/logs kept outside git.
+- Implemented lazy Three.js globe, local Natural Earth land geometry, selectable sources/origins, rotation/zoom/reset, motion pause and reduced-motion support. New editorial homepage uses all six actual projects, data provenance and existing security panel/Cyber Lab.
+- First production build and ESLint pass. Python collector tests: 6 passed. Browser review now underway; not claiming visually complete or fully validated.
+- Found brief’s deploy description is outdated: current main workflow deploys to VPS, retired IONOS path forbidden by existing contracts. Workflow remains untouched.
+
+IN FLIGHT: browser critique, homelab architecture preview, stronger telemetry validation, bundle accounting for lazy WebGL, regression suite. BLOCKED: no live feed is deployed; intentional snapshot scope is explicit throughout.
+
+## Final critique and validation — 2026-09-08
+- Tablet overflow isolated to ~3px from globe negative margins at 768px; fixed with tablet-specific margins. Tablet buttons stacked where needed; mobile capture timestamps get their own line.
+- Viewed final actual desktop, tablet, mobile hero/globe and full-page screenshots. Detailed critique and acknowledged limitations: docs/VISUAL-REVIEW.md.
+- All final checks pass: production build, ESLint, TypeScript, static/hardening/security tooling contracts, 7 JavaScript + 9 Python data tests, explicit bundle budget, preview routes/MIME, original Chromium smoke, independent redesign browser suite, git diff --check. Exact output in docs/validation-2026-09-08.txt.
+- New browser suite verifies real WebGL rotation, source switching/counts, origin access, GPU idle paused/offscreen, six loaded previews, filters, 320/390/768/1024 overflow, collapsed menu visibility/Escape focus, desktop/mobile axe zero violations, CSP/no third-party calls, no-WebGL/context-loss fallback, malformed/empty snapshots.
+- Scope remains an isolated, reviewable historical-data design exploration. No main edits, remote push, deploy, service or tmux changes. Public VPS and homelab data remain explicitly separate.
+
+DONE: implemented and visually reviewed exploration, tablet fix, validation evidence and handoff. IN FLIGHT: awaiting Jack’s visual feedback, not background implementation. BLOCKED: none for reviewing this branch; a live exporter and real hardware photo are future work, not claimed delivered.

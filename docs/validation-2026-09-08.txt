@@ -1,0 +1,121 @@
+
+$ npm run build
+npm warn cli npm v11.19.0 does not support Node.js v26.8.0-alpha.0.0.0. This version of npm supports the following node versions: `^20.17.0 || >=22.9.0`. You can find the latest version at https://nodejs.org/.
+
+> vite_react_shadcn_ts@0.0.0 build
+> vite build
+
+vite v8.2.2 building client environment for production...
+transforming...
+✓ 1597 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                              2.57 kB │ gzip:   0.97 kB
+dist/assets/Index-Bj0MYEFH.css              13.34 kB │ gzip:   3.60 kB
+dist/assets/index-wGKmCtsw.css              23.66 kB │ gzip:   5.58 kB
+dist/assets/createLucideIcon-BgST5Oj_.js     0.90 kB │ gzip:   0.54 kB
+dist/assets/NotFound-6rwljspX.js             1.04 kB │ gzip:   0.53 kB
+dist/assets/CyberLab-DSZje0nL.js            19.62 kB │ gzip:   6.69 kB
+dist/assets/utils-QYZy82fj.js               21.03 kB │ gzip:   7.34 kB
+dist/assets/Index-QnmugvtY.js               21.31 kB │ gzip:   7.31 kB
+dist/assets/SecurityDashboard-Dk9dWD9O.js   25.88 kB │ gzip:   7.77 kB
+dist/assets/index-B1xiSOz1.js              179.79 kB │ gzip:  59.74 kB
+dist/assets/AttackGlobe-CeoKtjib.js        530.20 kB │ gzip: 133.13 kB
+
+✓ built in 1.99s
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+Exit: 0
+
+$ npm run lint
+npm warn cli npm v11.19.0 does not support Node.js v26.8.0-alpha.0.0.0. This version of npm supports the following node versions: `^20.17.0 || >=22.9.0`. You can find the latest version at https://nodejs.org/.
+
+> vite_react_shadcn_ts@0.0.0 lint
+> eslint . --max-warnings=0
+
+Exit: 0
+
+$ npx tsc --noEmit -p tsconfig.app.json
+npm warn cli npm v11.19.0 does not support Node.js v26.8.0-alpha.0.0.0. This version of npm supports the following node versions: `^20.17.0 || >=22.9.0`. You can find the latest version at https://nodejs.org/.
+Exit: 0
+
+$ npm run test:site-contract
+npm warn cli npm v11.19.0 does not support Node.js v26.8.0-alpha.0.0.0. This version of npm supports the following node versions: `^20.17.0 || >=22.9.0`. You can find the latest version at https://nodejs.org/.
+
+> vite_react_shadcn_ts@0.0.0 test:site-contract
+> node scripts/site-contract-check.mjs && node scripts/hardening-regression-check.mjs && node scripts/security-tooling-contract-check.mjs
+
+Static site contract checks passed.
+Hardening regression checks passed.
+Security tooling, monitoring, and attack-surface contracts passed.
+Exit: 0
+
+$ npm run test:telemetry
+npm warn cli npm v11.19.0 does not support Node.js v26.8.0-alpha.0.0.0. This version of npm supports the following node versions: `^20.17.0 || >=22.9.0`. You can find the latest version at https://nodejs.org/.
+
+> vite_react_shadcn_ts@0.0.0 test:telemetry
+> node --test scripts/telemetry/*.test.mjs && python3 -m unittest discover -s scripts/telemetry -p 'test_*.py'
+
+✔ freshness depends on source generation time, not successful fetch (1.201364ms)
+✔ missing, invalid and implausible future times never imply fresh data (0.213011ms)
+✔ real public snapshot validates and all counts reconcile (11.717046ms)
+✔ rejects missing, duplicate and misclassified sources (1.540923ms)
+✔ rejects invented totals, invalid coordinates and timestamps (2.532161ms)
+✔ empty observations are valid and never filled with example data (0.474557ms)
+✔ published aggregate has no raw address, host or arbitrary log fields (1.356926ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 118.918325
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 0.001s
+
+OK
+Exit: 0
+
+$ npm run test:bundle-budget
+npm warn cli npm v11.19.0 does not support Node.js v26.8.0-alpha.0.0.0. This version of npm supports the following node versions: `^20.17.0 || >=22.9.0`. You can find the latest version at https://nodejs.org/.
+
+> vite_react_shadcn_ts@0.0.0 test:bundle-budget
+> node scripts/bundle-budget-check.mjs
+
+Bundle budget passed: 8 JavaScript assets / 799800 bytes; 2 CSS assets / 37012 bytes.
+Exit: 0
+
+$ npm run test:preview-contract
+npm warn cli npm v11.19.0 does not support Node.js v26.8.0-alpha.0.0.0. This version of npm supports the following node versions: `^20.17.0 || >=22.9.0`. You can find the latest version at https://nodejs.org/.
+
+> vite_react_shadcn_ts@0.0.0 test:preview-contract
+> node scripts/preview-contract-check.mjs
+
+Preview route and MIME contract checks passed.
+Exit: 0
+
+$ npm run smoke:browser
+npm warn cli npm v11.19.0 does not support Node.js v26.8.0-alpha.0.0.0. This version of npm supports the following node versions: `^20.17.0 || >=22.9.0`. You can find the latest version at https://nodejs.org/.
+
+> vite_react_shadcn_ts@0.0.0 smoke:browser
+> node scripts/browser-smoke.mjs
+
+Chromium smoke passed: CSP, consent/referrer privacy, deferred dashboard loading, network isolation, 404, DOM injection, links, ARIA/navigation, console, and mobile overflow.
+Exit: 0
+
+$ npm run test:redesign-browser
+npm warn cli npm v11.19.0 does not support Node.js v26.8.0-alpha.0.0.0. This version of npm supports the following node versions: `^20.17.0 || >=22.9.0`. You can find the latest version at https://nodejs.org/.
+
+> vite_react_shadcn_ts@0.0.0 test:redesign-browser
+> node scripts/redesign-browser.mjs
+
+Redesign browser checks passed: real WebGL render/rotation, source/count/selection, pause and offscreen GPU idle, six previews/filtering, 320–1024px overflow, actual menu visibility/Escape focus, desktop/mobile axe (zero violations), CSP/network isolation, WebGL/context-loss fallback, invalid/empty data.
+Exit: 0
+
+$ git diff --check
+Exit: 0

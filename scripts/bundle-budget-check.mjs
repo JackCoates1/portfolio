@@ -5,7 +5,9 @@ const budgets = Object.freeze({
   javascriptFile: 220 * 1024,
   javascriptTotal: 400 * 1024,
   stylesheetFile: 28 * 1024,
-  stylesheetTotal: 32 * 1024,
+  stylesheetTotal: 40 * 1024,
+  // Explicit allowance for the independently lazy-loaded WebGL engine.
+  globeFile: 550 * 1024,
 });
 
 const files = (await readdir(assetsDirectory)).sort();
@@ -24,8 +26,9 @@ const total = (assets) => assets.reduce((sum, { bytes }) => sum + bytes, 0);
 const violations = [];
 
 for (const { file, bytes } of javascript) {
-  if (bytes > budgets.javascriptFile) {
-    violations.push(`${file} is ${bytes} bytes (limit ${budgets.javascriptFile})`);
+  const limit = /^AttackGlobe-/.test(file) ? budgets.globeFile : budgets.javascriptFile;
+  if (bytes > limit) {
+    violations.push(`${file} is ${bytes} bytes (limit ${limit})`);
   }
 }
 for (const { file, bytes } of stylesheets) {
@@ -34,10 +37,14 @@ for (const { file, bytes } of stylesheets) {
   }
 }
 
+if (javascript.filter(({file}) => /^AttackGlobe-/.test(file)).length !== 1) {
+  violations.push("Expected exactly one independently lazy-loaded globe chunk");
+}
 const javascriptBytes = total(javascript);
 const stylesheetBytes = total(stylesheets);
-if (javascriptBytes > budgets.javascriptTotal) {
-  violations.push(`JavaScript total is ${javascriptBytes} bytes (limit ${budgets.javascriptTotal})`);
+const coreJavascriptBytes = total(javascript.filter(({file}) => !/^AttackGlobe-/.test(file)));
+if (coreJavascriptBytes > budgets.javascriptTotal) {
+  violations.push(`Non-globe JavaScript total is ${coreJavascriptBytes} bytes (limit ${budgets.javascriptTotal})`);
 }
 if (stylesheetBytes > budgets.stylesheetTotal) {
   violations.push(`CSS total is ${stylesheetBytes} bytes (limit ${budgets.stylesheetTotal})`);

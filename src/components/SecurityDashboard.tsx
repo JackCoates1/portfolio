@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from "react";
 import { Shield, ShieldAlert, Globe2, Activity, Radio } from "lucide-react";
 import AttackReplay, { type NotableReplay } from "@/components/AttackReplay";
 import VerifiedStatus from "@/components/VerifiedStatus";
+import { securityFreshness } from "@/lib/security-freshness.mjs";
 
 
 interface ScenarioCount {
@@ -159,6 +160,7 @@ const SecurityDashboard = () => {
     };
   }, []);
 
+  const sourceStatus = error ? "UNAVAILABLE" : stats ? securityFreshness(stats.generated_at) : "CONNECTING";
   const maxScenario = stats?.by_scenario[0]?.count ?? 1;
   const maxCountry = stats?.by_country[0]?.count ?? 1;
 
@@ -166,12 +168,12 @@ const SecurityDashboard = () => {
     <section id="security" className="py-20 px-4">
       <div className="container mx-auto max-w-6xl">
         <h2 className="text-4xl md:text-5xl font-bold mb-4 text-center">
-          Live <span className="text-gradient">Security</span>
+          Server <span className="text-gradient">security</span>
         </h2>
         <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-10">
-          CrowdSec runs on the server behind this site, parsing real traffic and
-          blocking malicious requests at the firewall. This is that data, live —
-          not a mockup.
+          A separate production endpoint supplies aggregate CrowdSec statistics for this
+          site’s server. This panel checks that endpoint every minute; it is independent
+          of the historical globe snapshot. Data may be unavailable in a branch preview.
         </p>
 
         <div className="bg-card border border-border rounded-lg overflow-hidden card-glow">
@@ -179,15 +181,15 @@ const SecurityDashboard = () => {
           <div className="flex flex-wrap items-center divide-x divide-border border-b border-border font-data text-xs">
             <div className="flex items-center gap-2 px-4 py-3">
               <span
-                className={`h-1.5 w-1.5 rounded-full ${error ? "" : "animate-pulse"}`}
+                className="h-1.5 w-1.5 rounded-full"
                 style={{
-                  backgroundColor: error
-                    ? "hsl(var(--status-critical))"
-                    : "hsl(var(--status-info))",
+                  backgroundColor: sourceStatus === "RECENT"
+                    ? "hsl(var(--status-info))"
+                    : "hsl(var(--status-warning))",
                 }}
               />
               <span className="text-muted-foreground">
-                {error ? "OFFLINE" : "LIVE"}
+                {sourceStatus}
               </span>
             </div>
             <div className="px-4 py-3">
@@ -205,7 +207,7 @@ const SecurityDashboard = () => {
               </span>
             </div>
             <div className="px-4 py-3 ml-auto text-muted-foreground">
-              {stats ? `SYNCED ${timeAgo(stats.generated_at)}` : "CONNECTING…"}
+              {stats && sourceStatus !== "UNVERIFIED" ? `SOURCE ${timeAgo(stats.generated_at)}` : error ? "NO CURRENT RESPONSE" : "WAITING FOR SOURCE"}
             </div>
           </div>
 
@@ -214,7 +216,7 @@ const SecurityDashboard = () => {
             <div className="lg:col-span-2 bg-card p-6">
               <div className="flex items-center gap-2 mb-4">
                 <Activity className="h-3.5 w-3.5 text-primary" />
-                <span className="label-micro">Threat Timeline</span>
+                <span className="label-micro">Detection timeline</span>
               </div>
               <div className="h-52">
                 <TimelineChart data={stats?.timeline ?? []} />
@@ -225,7 +227,7 @@ const SecurityDashboard = () => {
             <div className="bg-card p-6">
               <div className="flex items-center gap-2 mb-4">
                 <ShieldAlert className="h-3.5 w-3.5 text-primary" />
-                <span className="label-micro">Attack Scenarios</span>
+                <span className="label-micro">Detection scenarios</span>
               </div>
               <div className="space-y-3">
                 {(stats?.by_scenario ?? []).slice(0, 6).map((s, i) => (
@@ -256,7 +258,7 @@ const SecurityDashboard = () => {
           <div className="border-t border-border bg-card p-6">
             <div className="flex items-center gap-2 mb-4">
               <Globe2 className="h-3.5 w-3.5 text-primary" />
-              <span className="label-micro">Attack Origins</span>
+              <span className="label-micro">Source countries</span>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-3">
               {(stats?.by_country ?? []).map((c) => (
