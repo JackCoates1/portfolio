@@ -5,6 +5,7 @@ import PortfolioWork from "@/components/PortfolioWork";
 import { profile } from "@/data/profile";
 import "@/portfolio.css";
 import { useSecuritySnapshot } from "@/data/telemetry";
+import { useMotionPreference } from "@/lib/useMotionPreference";
 import { coverage, dateLabel } from "@/lib/telemetry.mjs";
 
 const SecurityDashboard = lazy(() => import("@/components/SecurityDashboard"));
@@ -70,15 +71,7 @@ const Index = () => {
   const { snapshot, error } = useSecuritySnapshot();
   const vps = snapshot?.feeds.find((f) => f.id === "vps");
   const homelab = snapshot?.feeds.find((f) => f.id === "homelab");
-  const [paused, setPaused] = useState(
-    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-  );
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const change = () => setPaused(media.matches);
-    media.addEventListener("change", change);
-    return () => media.removeEventListener("change", change);
-  }, []);
+  const { paused, toggleMotion } = useMotionPreference();
   return (
     <div className="portfolio" data-paused={paused}>
       <div className="ambient-field" aria-hidden="true" />
@@ -135,7 +128,7 @@ const Index = () => {
               / Schematic paths, not packet routes
             </span>
           </p>
-          <button aria-pressed={paused} onClick={() => setPaused((p) => !p)}>
+          <button aria-pressed={paused} onClick={toggleMotion}>
             {paused ? "Resume motion" : "Pause motion"}{" "}
             <span aria-hidden="true">{paused ? "▷" : "Ⅱ"}</span>
           </button>

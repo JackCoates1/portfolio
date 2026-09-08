@@ -61,7 +61,7 @@ const projects = [
     image: "portfolio",
     type: "Personal platform / ongoing exploration",
     description:
-      "The original production site, now being reimagined around a real-data network observatory. Built with React and Vite, with verifiable build provenance.",
+      "A portfolio built around a real-data network observatory, with server-security insights and verifiable build provenance. The preview shows the original design.",
     stack: "React / TypeScript / Vite / Three.js",
     url: "https://github.com/JackCoates1/portfolio",
     action: "View the source",

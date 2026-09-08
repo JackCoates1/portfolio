@@ -173,7 +173,7 @@ const SecurityDashboard = () => {
         <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-10">
           A separate production endpoint supplies aggregate CrowdSec statistics for this
           site’s server. This panel checks that endpoint every minute; it is independent
-          of the historical globe snapshot. Data may be unavailable in a branch preview.
+          of the historical globe snapshot. If the source cannot be reached, the panel reports it as unavailable.
         </p>
 
         <div className="bg-card border border-border rounded-lg overflow-hidden card-glow">

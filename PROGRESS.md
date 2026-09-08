@@ -1,6 +1,6 @@
 # Cyber globe portfolio — running log
 
-Current status: reviewed exploration complete; final validation and critique below. Branch `redesign/cyber-globe-2026-09-07`, worktree `/root/portfolio-cyber-globe`. No deployment.
+Current status: approved redesign deployed successfully as main 1d57bf1; authorized motion-preference and CI improvements follow. See the latest dated entry below. Main release worktree `/root/portfolio-release`; improvement worktree `/root/portfolio-cyber-globe`.
 
 ## 2026-09-08 — discovery
 - Full brief recovered; fresh bare clone `/root/portfolio-redesign.git`, worktree `/root/portfolio-cyber-globe`, branch `redesign/cyber-globe-2026-09-07`, base `fac0f4e` (current remote main).
@@ -32,3 +32,12 @@ IN FLIGHT: browser critique, homelab architecture preview, stronger telemetry va
 - Scope remains an isolated, reviewable historical-data design exploration. No main edits, remote push, deploy, service or tmux changes. Public VPS and homelab data remain explicitly separate.
 
 DONE: implemented and visually reviewed exploration, tablet fix, validation evidence and handoff. IN FLIGHT: awaiting Jack’s visual feedback, not background implementation. BLOCKED: none for reviewing this branch; a live exporter and real hardware photo are future work, not claimed delivered.
+
+## Approved production release and follow-up — 2026-09-08
+- Jack explicitly approved replacing production and continuing improvements; earlier no-deploy restriction superseded.
+- Premerge verified remote main was still fac0f4e. Byte-equality checks preserved index metadata, sitemap, robots, 404, security policies, web manifest, resume endpoint, App routes, Cyber Lab, NotFound and operations/redirect configuration. Existing contracts and production dependency audit passed.
+- Merged approved redesign with a real merge commit 1d57bf1 and pushed main. Existing `Build, attest, and deploy to VPS` run 34196912231 completed successfully, both build and deployment. Repository-security run 34196912213 also passed. The retired IONOS deployment was not reintroduced.
+- HTTPS fetched the new Index-QnmugvtY.js bundle containing “Make it better.” and “Network observatory”; SHA256 1966147b5d6a542775d7276262d24c59f1e6c48670217494794540f372efe4b8. The published historical dataset matched committed bytes exactly. Live Chromium rendered globe with zero runtime errors, and existing server-security endpoint provided RECENT genuine data. Cyber Lab, sitemap, robots, policy, resume, previews and globe geography returned HTTP200.
+- Follow-up branch improve/portfolio-motion-ci-2026-09-08: remember explicit pause across reload/navigation; OS reduced motion remains respected; blocked storage never breaks controls. Added browser regressions for persistence, OS changes and denied storage.
+- Added telemetry and actual WebGL/accessibility regressions to the existing deployment build job. Updated old exploration wording for production. No transport, deployment credentials, permissions or production services changed.
+- Follow-up local production build, lint, TypeScript, data tests, bundle budget and extended browser suite passed. Existing security smoke rerun before publishing.

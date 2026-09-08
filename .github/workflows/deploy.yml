@@ -45,6 +45,9 @@ jobs:
       - name: Run repository security contracts
         run: npm run test:site-contract
 
+      - name: Validate historical telemetry
+        run: npm run test:telemetry
+
       - name: Build
         run: npm run build
 
@@ -61,6 +64,9 @@ jobs:
 
       - name: Run Chromium security regressions
         run: npm run smoke:browser
+
+      - name: Run globe and accessibility regressions
+        run: npm run test:redesign-browser
 
       - name: Validate and package deployment artifact
         id: archive-digest

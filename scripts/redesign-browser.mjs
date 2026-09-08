@@ -266,9 +266,40 @@ try {
   await zero.getByText("No qualifying observations").waitFor();
   assert.equal(await zero.locator("#origin option").count(), 1);
   await empty.close();
+  const preference = await browser.newContext({
+    reducedMotion: "no-preference",
+  });
+  const pref = await preference.newPage();
+  await pref.goto(url);
+  await pref.getByRole("button", { name: "Pause motion" }).click();
+  await pref.goto(`${url}/cyberlab`);
+  await pref.getByRole("link", { name: /Back home/i }).click();
+  await pref.locator('.portfolio[data-paused="true"]').waitFor();
+  await pref.reload();
+  await pref.locator('.portfolio[data-paused="true"]').waitFor();
+  await pref.getByRole("button", { name: "Resume motion" }).click();
+  await pref.reload();
+  await pref.locator('.portfolio[data-paused="false"]').waitFor();
+  await pref.emulateMedia({ reducedMotion: "reduce" });
+  await pref.locator('.portfolio[data-paused="true"]').waitFor();
+  await preference.close();
+  const blockedStorage = await browser.newContext({
+    reducedMotion: "no-preference",
+  });
+  await blockedStorage.addInitScript(() => {
+    for (const method of ["getItem", "setItem"])
+      Storage.prototype[method] = () => {
+        throw new DOMException("Storage blocked", "SecurityError");
+      };
+  });
+  const noStorage = await blockedStorage.newPage();
+  await noStorage.goto(url);
+  await noStorage.getByRole("button", { name: "Pause motion" }).click();
+  await noStorage.locator('.portfolio[data-paused="true"]').waitFor();
+  await blockedStorage.close();
   assert.deepEqual(runtimeErrors, []);
   console.log(
-    "Redesign browser checks passed: real WebGL render/rotation, source/count/selection, pause and offscreen GPU idle, six previews/filtering, 320–1024px overflow, actual menu visibility/Escape focus, desktop/mobile axe (zero violations), CSP/network isolation, WebGL/context-loss fallback, invalid/empty data.",
+    "Redesign browser checks passed: real WebGL render/rotation, source/count/selection, pause and offscreen GPU idle, six previews/filtering, 320–1024px overflow, actual menu visibility/Escape focus, desktop/mobile axe (zero violations), CSP/network isolation, WebGL/context-loss fallback, invalid/empty data, persisted motion preference and blocked-storage fallback.",
   );
 } finally {
   await browser.close();
