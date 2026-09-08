@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:dev": "vite build --mode development",
+    "build": "npm run build:cv && vite build",
+    "build:dev": "npm run build:cv && vite build --mode development",
     "lint": "eslint . --max-warnings=0",
     "test:site-contract": "node scripts/site-contract-check.mjs && node scripts/hardening-regression-check.mjs && node scripts/security-tooling-contract-check.mjs",
     "test:bundle-budget": "node scripts/bundle-budget-check.mjs",
@@ -18,7 +18,9 @@
     "monitor:security": "node scripts/security-monitor.mjs",
     "test:telemetry": "node --test scripts/telemetry/*.test.mjs && python3 -m unittest discover -s scripts/telemetry -p 'test_*.py'",
     "test:redesign-browser": "node scripts/redesign-browser.mjs",
-    "test:mobile-globe": "node scripts/mobile-globe.mjs"
+    "test:mobile-globe": "node scripts/mobile-globe.mjs",
+    "build:cv": "node scripts/build-cv.mjs",
+    "test:cv": "node scripts/cv-browser.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",

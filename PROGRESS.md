@@ -47,3 +47,9 @@ DONE: implemented and visually reviewed exploration, tablet fix, validation evid
 - Canvas now owns touch gestures, rotates in both axes without the former vertical clamp, tracks the active pointer, and clears drag on lost capture. The surrounding page remains scrollable; an inline hint explains the boundary.
 - New real-touch regression fails before the fix and passes afterward for horizontal, vertical and diagonal drags; asserts no scroll/cancel and changed WebGL output. Added to deployment CI. Local build/lint and existing globe/accessibility checks pass.
 - CV investigation: homepage links directly to raw JSON; no human-readable resume component exists. Next release will add a proper printable presentation while retaining the machine-readable endpoint.
+
+## Readable CV release
+- Mobile globe fix d50878a is deployed; Actions34198473409 successful. Real touch regression also passed against the live site.
+- Replaced the raw-JSON primary CV link with /cv.html: a pre-rendered, responsive document with readable contact details, profile, technical skills and six real projects. Print / Save PDF uses browser printing and has a reviewed two-page A4 layout. Content remains readable without JavaScript.
+- Profile/CV/API now derive from shared src/data/resume.json; project gallery and CV share src/data/projects.mjs. Education explicitly says studies in progress rather than implying a completed bachelor's degree. No invented dates, institution or employment.
+- Retained /api/resume, all old routes and metadata; added CV to sitemap and route tests. Desktop/mobile axe, no overflow, print control, no-JS and actual PDF pagination checks pass; screenshots and print evidence inspected.

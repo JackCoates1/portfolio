@@ -15,6 +15,7 @@ try {
   const checks = [
     ["/", 200, /^text\/html\b/],
     ["/cyberlab", 200, /^text\/html\b/],
+    ["/cv.html", 200, /^text\/html\b/],
     ["/definitely-missing", 404, /^text\/html\b/],
     ["/404.html", 200, /^text\/html\b/],
     ["/site.webmanifest", 200, /^application\/manifest\+json\b/],

@@ -71,6 +71,9 @@ jobs:
       - name: Run real mobile touch regressions
         run: npm run test:mobile-globe
 
+      - name: Check readable and printable CV
+        run: npm run test:cv
+
       - name: Validate and package deployment artifact
         id: archive-digest
         run: |

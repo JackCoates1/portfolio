@@ -29,7 +29,7 @@ assert.doesNotMatch(verifiedStatus, /\/security\/dependabot/);
 
 assert.match(sitemap, /<loc>https:\/\/jackcoates\.co\.uk\/<\/loc>/);
 const sitemapLocations = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, location]) => location);
-assert.deepEqual(sitemapLocations, ["https://jackcoates.co.uk/", "https://jackcoates.co.uk/cyberlab"]);
+assert.deepEqual(sitemapLocations, ["https://jackcoates.co.uk/", "https://jackcoates.co.uk/cyberlab", "https://jackcoates.co.uk/cv.html"]);
 for (const location of sitemapLocations) {
   const url = new URL(location);
   assert.equal(url.protocol, "https:", `sitemap URL must use HTTPS: ${location}`);

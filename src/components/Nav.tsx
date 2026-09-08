@@ -8,6 +8,7 @@ const navLinks = [
   { label: "Security", href: "#security" },
   { label: "Cyber Lab", href: "/cyberlab" },
   { label: "Contact", href: "#contact" },
+  { label: "CV", href: "/cv.html" },
 ];
 
 const Nav = () => {
@@ -33,6 +34,7 @@ const Nav = () => {
   }, [open]);
 
   const handleClick = (href: string, event?: MouseEvent<HTMLAnchorElement>) => {
+    if (href.endsWith(".html") || event?.metaKey || event?.ctrlKey || event?.shiftKey || event?.altKey) return;
     event?.preventDefault();
     setOpen(false);
     if (open) requestAnimationFrame(() => menuButtonRef.current?.focus());

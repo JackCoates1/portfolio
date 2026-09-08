@@ -242,7 +242,7 @@ const Index = () => {
             >
               LinkedIn ↗
             </a>
-            <a href="/api/resume">Résumé JSON ↗</a>
+            <a href="/cv.html">View my CV ↗</a>
             <a href="/cyberlab">Explore the Cyber Lab ↗</a>
           </div>
         </section>
