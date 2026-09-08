@@ -117,3 +117,7 @@ All colors MUST be HSL.
     scroll-behavior: auto !important;
   }
 }
+
+/* A utility display class must never override the collapsed menu's HTML state. */
+#mobile-navigation[hidden] { display: none; }
+.nav-name { font: 13px Outfit, sans-serif; letter-spacing: 0; }

@@ -29,3 +29,7 @@ dist-ssr
 tsconfig.*.tsbuildinfo
 dist/
 node_modules/
+
+# Local Python collector caches
+__pycache__/
+*.pyc

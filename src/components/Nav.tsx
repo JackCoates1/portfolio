@@ -3,13 +3,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 
 const navLinks = [
-  { label: "Home", href: "#home" },
+  { label: "Work", href: "#projects" },
   { label: "About", href: "#about" },
-  { label: "Skills", href: "#skills" },
-  { label: "Projects", href: "#projects" },
   { label: "Security", href: "#security" },
-  { label: "Contact", href: "#contact" },
   { label: "Cyber Lab", href: "/cyberlab" },
+  { label: "Contact", href: "#contact" },
 ];
 
 const Nav = () => {
@@ -25,10 +23,19 @@ const Nav = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { setOpen(false); menuButtonRef.current?.focus(); }
+    };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [open]);
+
   const handleClick = (href: string, event?: MouseEvent<HTMLAnchorElement>) => {
     event?.preventDefault();
     setOpen(false);
-    requestAnimationFrame(() => menuButtonRef.current?.focus());
+    if (open) requestAnimationFrame(() => menuButtonRef.current?.focus());
 
     if (href.startsWith("/")) {
       navigate(href);
@@ -54,7 +61,7 @@ const Nav = () => {
   return (
     <nav aria-label="Primary navigation" className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${navBg}`}>
       <div className="container mx-auto px-6 h-14 flex items-center justify-between max-w-6xl">
-        <span className="font-bold text-base font-mono text-primary tracking-widest">JC</span>
+        <a href="/#home" aria-label="Jack Coates home" onClick={(event) => handleClick("#home", event)}><span className="font-bold text-base font-mono text-primary tracking-widest">JC<span aria-hidden="true"> / </span><span className="nav-name">Jack Coates</span></span></a>
 
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((l) => (

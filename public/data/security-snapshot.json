@@ -1,0 +1,779 @@
+{
+  "version": 1,
+  "mode": "snapshot",
+  "capturedAt": "2026-09-08T02:40:53.329999Z",
+  "feeds": [
+    {
+      "id": "vps",
+      "label": "VPS \u00b7 CrowdSec",
+      "kind": "detections",
+      "description": "Historical local detections on my public VPS. These are not homelab detections or community blocklist entries.",
+      "geoSource": "Coordinates recorded by CrowdSec GeoIP enrichment; rounded to 0.1\u00b0.",
+      "inputRecords": 200,
+      "count": 200,
+      "excluded": {},
+      "nodes": [
+        {
+          "id": "07be4c1cbc9d",
+          "country": "TR",
+          "latitude": 40.2,
+          "longitude": 29.1,
+          "count": 21,
+          "firstSeen": "2026-09-05T07:28:49Z",
+          "lastSeen": "2026-09-08T01:38:41Z",
+          "categories": [
+            {
+              "label": "SSH brute-force detection",
+              "count": 21
+            }
+          ]
+        },
+        {
+          "id": "e599932f0f25",
+          "country": "US",
+          "latitude": 37.8,
+          "longitude": -97.8,
+          "count": 18,
+          "firstSeen": "2026-09-05T10:51:45Z",
+          "lastSeen": "2026-09-08T01:24:57Z",
+          "categories": [
+            {
+              "label": "Web exploit detection",
+              "count": 1
+            },
+            {
+              "label": "Web reconnaissance detection",
+              "count": 17
+            }
+          ]
+        },
+        {
+          "id": "27c3c546be65",
+          "country": "IR",
+          "latitude": 35.7,
+          "longitude": 51.4,
+          "count": 16,
+          "firstSeen": "2026-09-05T07:48:36Z",
+          "lastSeen": "2026-09-08T01:22:17Z",
+          "categories": [
+            {
+              "label": "SSH brute-force detection",
+              "count": 16
+            }
+          ]
+        },
+        {
+          "id": "85a0d5c6ef70",
+          "country": "FR",
+          "latitude": 48.9,
+          "longitude": 2.3,
+          "count": 13,
+          "firstSeen": "2026-09-07T10:26:33Z",
+          "lastSeen": "2026-09-08T02:34:53Z",
+          "categories": [
+            {
+              "label": "Web exploit detection",
+              "count": 4
+            },
+            {
+              "label": "Web reconnaissance detection",
+              "count": 9
+            }
+          ]
+        },
+        {
+          "id": "be5bc2dc3964",
+          "country": "BG",
+          "latitude": 42.7,
+          "longitude": 23.3,
+          "count": 11,
+          "firstSeen": "2026-09-06T19:12:38Z",
+          "lastSeen": "2026-09-08T00:24:48Z",
+          "categories": [
+            {
+              "label": "SSH brute-force detection",
+              "count": 7
+            },
+            {
+              "label": "Web reconnaissance detection",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "id": "7e3461188633",
+          "country": "US",
+          "latitude": 32.9,
+          "longitude": -80.0,
+          "count": 9,
+          "firstSeen": "2026-09-06T13:48:57Z",
+          "lastSeen": "2026-09-07T05:44:05Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 9
+            }
+          ]
+        },
+        {
+          "id": "427e72bb3362",
+          "country": "JP",
+          "latitude": 35.7,
+          "longitude": 139.7,
+          "count": 8,
+          "firstSeen": "2026-09-07T01:50:26Z",
+          "lastSeen": "2026-09-07T16:53:18Z",
+          "categories": [
+            {
+              "label": "Web exploit detection",
+              "count": 1
+            },
+            {
+              "label": "Web reconnaissance detection",
+              "count": 7
+            }
+          ]
+        },
+        {
+          "id": "68d2cf84bba5",
+          "country": "NL",
+          "latitude": 53.2,
+          "longitude": 6.6,
+          "count": 8,
+          "firstSeen": "2026-09-07T05:44:49Z",
+          "lastSeen": "2026-09-07T23:41:42Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 8
+            }
+          ]
+        },
+        {
+          "id": "2befe58ef7c5",
+          "country": "SG",
+          "latitude": 1.4,
+          "longitude": 104.0,
+          "count": 7,
+          "firstSeen": "2026-09-07T07:35:39Z",
+          "lastSeen": "2026-09-07T09:56:55Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 7
+            }
+          ]
+        },
+        {
+          "id": "69ac1e9c1fda",
+          "country": "RO",
+          "latitude": 46.0,
+          "longitude": 25.0,
+          "count": 7,
+          "firstSeen": "2026-09-05T05:28:13Z",
+          "lastSeen": "2026-09-07T23:29:52Z",
+          "categories": [
+            {
+              "label": "SSH brute-force detection",
+              "count": 7
+            }
+          ]
+        },
+        {
+          "id": "674fefd32531",
+          "country": "BY",
+          "latitude": 53.9,
+          "longitude": 27.6,
+          "count": 6,
+          "firstSeen": "2026-09-05T09:38:10Z",
+          "lastSeen": "2026-09-07T01:33:45Z",
+          "categories": [
+            {
+              "label": "SSH brute-force detection",
+              "count": 6
+            }
+          ]
+        },
+        {
+          "id": "d633de126610",
+          "country": "GB",
+          "latitude": 51.5,
+          "longitude": -0.1,
+          "count": 6,
+          "firstSeen": "2026-09-05T07:50:28Z",
+          "lastSeen": "2026-09-07T05:44:08Z",
+          "categories": [
+            {
+              "label": "SSH brute-force detection",
+              "count": 3
+            },
+            {
+              "label": "Web reconnaissance detection",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "id": "10c059a94ec1",
+          "country": "DE",
+          "latitude": 52.5,
+          "longitude": 13.4,
+          "count": 5,
+          "firstSeen": "2026-09-06T15:41:32Z",
+          "lastSeen": "2026-09-06T15:41:46Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 5
+            }
+          ]
+        },
+        {
+          "id": "00a1dddc8212",
+          "country": "TR",
+          "latitude": 41.1,
+          "longitude": 28.8,
+          "count": 4,
+          "firstSeen": "2026-09-07T18:40:00Z",
+          "lastSeen": "2026-09-07T18:40:03Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "id": "227dc2f46819",
+          "country": "BE",
+          "latitude": 50.9,
+          "longitude": 4.3,
+          "count": 4,
+          "firstSeen": "2026-09-06T22:13:25Z",
+          "lastSeen": "2026-09-07T23:10:56Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "id": "888268ddf0d2",
+          "country": "KR",
+          "latitude": 37.5,
+          "longitude": 126.7,
+          "count": 4,
+          "firstSeen": "2026-09-07T17:57:53Z",
+          "lastSeen": "2026-09-07T17:58:38Z",
+          "categories": [
+            {
+              "label": "Web exploit detection",
+              "count": 1
+            },
+            {
+              "label": "Web reconnaissance detection",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "id": "8b8a02e7e81f",
+          "country": "US",
+          "latitude": 36.2,
+          "longitude": -115.1,
+          "count": 4,
+          "firstSeen": "2026-09-07T08:39:06Z",
+          "lastSeen": "2026-09-07T08:40:03Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "id": "9ee668162aee",
+          "country": "DE",
+          "latitude": 50.1,
+          "longitude": 8.7,
+          "count": 4,
+          "firstSeen": "2026-09-07T05:07:14Z",
+          "lastSeen": "2026-09-07T05:07:35Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "id": "ca17712df38a",
+          "country": "JP",
+          "latitude": 34.7,
+          "longitude": 135.5,
+          "count": 4,
+          "firstSeen": "2026-09-06T12:33:20Z",
+          "lastSeen": "2026-09-07T19:53:46Z",
+          "categories": [
+            {
+              "label": "Web exploit detection",
+              "count": 1
+            },
+            {
+              "label": "Web reconnaissance detection",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "id": "391b9daaacef",
+          "country": "PK",
+          "latitude": 30.0,
+          "longitude": 70.0,
+          "count": 3,
+          "firstSeen": "2026-09-06T18:30:19Z",
+          "lastSeen": "2026-09-06T18:30:25Z",
+          "categories": [
+            {
+              "label": "Web exploit detection",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "id": "87fce1a80ed2",
+          "country": "VN",
+          "latitude": 16.2,
+          "longitude": 107.8,
+          "count": 3,
+          "firstSeen": "2026-09-07T00:24:07Z",
+          "lastSeen": "2026-09-07T00:24:14Z",
+          "categories": [
+            {
+              "label": "Web exploit detection",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "id": "893ddca36ed5",
+          "country": "US",
+          "latitude": 38.9,
+          "longitude": -77.0,
+          "count": 3,
+          "firstSeen": "2026-09-05T10:27:14Z",
+          "lastSeen": "2026-09-06T18:18:41Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "id": "9b058e24edd6",
+          "country": "BR",
+          "latitude": -23.5,
+          "longitude": -46.6,
+          "count": 3,
+          "firstSeen": "2026-09-06T10:15:41Z",
+          "lastSeen": "2026-09-06T10:15:42Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "id": "26d2faec73d1",
+          "country": "US",
+          "latitude": 41.6,
+          "longitude": -93.6,
+          "count": 2,
+          "firstSeen": "2026-09-07T14:59:20Z",
+          "lastSeen": "2026-09-07T18:38:39Z",
+          "categories": [
+            {
+              "label": "Web exploit detection",
+              "count": 1
+            },
+            {
+              "label": "Web reconnaissance detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "3714eff6e9d6",
+          "country": "GB",
+          "latitude": 51.5,
+          "longitude": -0.6,
+          "count": 2,
+          "firstSeen": "2026-09-06T19:12:34Z",
+          "lastSeen": "2026-09-07T06:42:03Z",
+          "categories": [
+            {
+              "label": "SSH brute-force detection",
+              "count": 1
+            },
+            {
+              "label": "Web exploit detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "6329528c4615",
+          "country": "US",
+          "latitude": 32.8,
+          "longitude": -96.8,
+          "count": 2,
+          "firstSeen": "2026-09-07T20:42:04Z",
+          "lastSeen": "2026-09-07T23:19:16Z",
+          "categories": [
+            {
+              "label": "SSH brute-force detection",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "id": "7ad07c6497fa",
+          "country": "CN",
+          "latitude": 34.8,
+          "longitude": 113.7,
+          "count": 2,
+          "firstSeen": "2026-09-07T23:30:32Z",
+          "lastSeen": "2026-09-08T00:27:13Z",
+          "categories": [
+            {
+              "label": "SSH brute-force detection",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "id": "887bc3316a81",
+          "country": "US",
+          "latitude": 29.4,
+          "longitude": -98.5,
+          "count": 2,
+          "firstSeen": "2026-09-06T12:05:37Z",
+          "lastSeen": "2026-09-07T22:50:39Z",
+          "categories": [
+            {
+              "label": "Web exploit detection",
+              "count": 1
+            },
+            {
+              "label": "Web reconnaissance detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "993a7fbc1fe1",
+          "country": "KR",
+          "latitude": 37.6,
+          "longitude": 127.0,
+          "count": 2,
+          "firstSeen": "2026-09-05T11:32:26Z",
+          "lastSeen": "2026-09-05T11:32:27Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "id": "b5ec6e0c8ec8",
+          "country": "US",
+          "latitude": 40.8,
+          "longitude": -74.5,
+          "count": 2,
+          "firstSeen": "2026-09-07T03:42:50Z",
+          "lastSeen": "2026-09-07T03:42:55Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 2
+            }
+          ]
+        },
+        {
+          "id": "1053c16179c3",
+          "country": "SG",
+          "latitude": 1.3,
+          "longitude": 103.7,
+          "count": 1,
+          "firstSeen": "2026-09-07T14:58:41Z",
+          "lastSeen": "2026-09-07T14:58:45Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "358ca98ce42e",
+          "country": "IN",
+          "latitude": 19.1,
+          "longitude": 72.9,
+          "count": 1,
+          "firstSeen": "2026-09-06T21:19:51Z",
+          "lastSeen": "2026-09-06T21:20:00Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "35b64a40ccc4",
+          "country": "DE",
+          "latitude": 51.3,
+          "longitude": 9.5,
+          "count": 1,
+          "firstSeen": "2026-09-06T11:51:51Z",
+          "lastSeen": "2026-09-06T11:52:22Z",
+          "categories": [
+            {
+              "label": "SSH brute-force detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "4b7dd800a2ae",
+          "country": "US",
+          "latitude": 47.5,
+          "longitude": -122.3,
+          "count": 1,
+          "firstSeen": "2026-09-05T11:11:04Z",
+          "lastSeen": "2026-09-05T11:11:05Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "4f3a5b27db38",
+          "country": "US",
+          "latitude": 38.7,
+          "longitude": -78.2,
+          "count": 1,
+          "firstSeen": "2026-09-07T06:48:16Z",
+          "lastSeen": "2026-09-07T06:48:16Z",
+          "categories": [
+            {
+              "label": "Web exploit detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "7257e471b3f2",
+          "country": "SG",
+          "latitude": 1.3,
+          "longitude": 103.8,
+          "count": 1,
+          "firstSeen": "2026-09-06T23:40:13Z",
+          "lastSeen": "2026-09-06T23:40:13Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "91b58548dd87",
+          "country": "SE",
+          "latitude": 59.3,
+          "longitude": 18.1,
+          "count": 1,
+          "firstSeen": "2026-09-07T01:59:26Z",
+          "lastSeen": "2026-09-07T01:59:26Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "961c9b5eb481",
+          "country": "TW",
+          "latitude": 24.0,
+          "longitude": 121.0,
+          "count": 1,
+          "firstSeen": "2026-09-07T16:25:42Z",
+          "lastSeen": "2026-09-07T16:25:42Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "a8df601047f3",
+          "country": "PK",
+          "latitude": 32.5,
+          "longitude": 74.5,
+          "count": 1,
+          "firstSeen": "2026-09-07T20:58:33Z",
+          "lastSeen": "2026-09-07T20:58:33Z",
+          "categories": [
+            {
+              "label": "Web exploit detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "b6e80e38727b",
+          "country": "US",
+          "latitude": 45.8,
+          "longitude": -119.7,
+          "count": 1,
+          "firstSeen": "2026-09-05T09:03:52Z",
+          "lastSeen": "2026-09-05T09:03:53Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "c13095c58ba1",
+          "country": "TR",
+          "latitude": 41.0,
+          "longitude": 29.0,
+          "count": 1,
+          "firstSeen": "2026-09-07T03:07:21Z",
+          "lastSeen": "2026-09-07T03:07:21Z",
+          "categories": [
+            {
+              "label": "Web exploit detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "c247465c8ab8",
+          "country": "US",
+          "latitude": 40.8,
+          "longitude": -74.0,
+          "count": 1,
+          "firstSeen": "2026-09-07T10:35:10Z",
+          "lastSeen": "2026-09-07T10:35:10Z",
+          "categories": [
+            {
+              "label": "Web exploit detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "c9012a177900",
+          "country": "NL",
+          "latitude": 50.9,
+          "longitude": 6.1,
+          "count": 1,
+          "firstSeen": "2026-09-07T19:40:32Z",
+          "lastSeen": "2026-09-07T19:40:32Z",
+          "categories": [
+            {
+              "label": "Web reconnaissance detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "d2ed83411d48",
+          "country": "NL",
+          "latitude": 52.4,
+          "longitude": 4.9,
+          "count": 1,
+          "firstSeen": "2026-09-07T12:03:35Z",
+          "lastSeen": "2026-09-07T12:03:35Z",
+          "categories": [
+            {
+              "label": "Web exploit detection",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "id": "f4604c3721f6",
+          "country": "PK",
+          "latitude": 31.6,
+          "longitude": 74.3,
+          "count": 1,
+          "firstSeen": "2026-09-07T07:09:38Z",
+          "lastSeen": "2026-09-07T07:09:38Z",
+          "categories": [
+            {
+              "label": "Web exploit detection",
+              "count": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "homelab",
+      "label": "Homelab \u00b7 OPNsense",
+      "kind": "blocks",
+      "description": "Public-source inbound blocks in a bounded firewall log capture. Blocking alone does not establish malicious intent. Private CrowdSec sources and Suricata events are not included.",
+      "geoSource": "ipwho.is lookup at capture time; rounded to 0.1\u00b0. IPs remain private.",
+      "inputRecords": 5000,
+      "count": 4,
+      "excluded": {
+        "privateCrowdSecAlerts": 31,
+        "suricataAlerts": 0
+      },
+      "nodes": [
+        {
+          "id": "44a2977a6d93",
+          "country": "TH",
+          "latitude": 12.8,
+          "longitude": 100.0,
+          "count": 3,
+          "firstSeen": "2026-09-08T02:16:57Z",
+          "lastSeen": "2026-09-08T02:35:26Z",
+          "categories": [
+            {
+              "label": "Inbound firewall block \u00b7 not classified as an attack",
+              "count": 3
+            }
+          ]
+        },
+        {
+          "id": "45e40f1155fb",
+          "country": "US",
+          "latitude": 37.8,
+          "longitude": -122.4,
+          "count": 1,
+          "firstSeen": "2026-09-08T02:33:44Z",
+          "lastSeen": "2026-09-08T02:33:44Z",
+          "categories": [
+            {
+              "label": "Inbound firewall block \u00b7 not classified as an attack",
+              "count": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

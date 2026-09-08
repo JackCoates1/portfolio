@@ -15,7 +15,9 @@
     "preview": "node scripts/preview-server.mjs",
     "audit:osv": "node scripts/osv-audit.mjs",
     "sbom": "npm sbom --sbom-format=cyclonedx",
-    "monitor:security": "node scripts/security-monitor.mjs"
+    "monitor:security": "node scripts/security-monitor.mjs",
+    "test:telemetry": "node --test scripts/telemetry/*.test.mjs && python3 -m unittest discover -s scripts/telemetry -p 'test_*.py'",
+    "test:redesign-browser": "node scripts/redesign-browser.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
@@ -26,20 +28,24 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.18.2",
     "tailwind-merge": "^2.6.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "three": "^0.185.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^9.32.0",
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^22.16.5",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
+    "@types/three": "^0.185.4",
     "@vitejs/plugin-react-swc": "^4.3.3",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
+    "playwright": "^1.63.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
