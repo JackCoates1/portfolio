@@ -3,8 +3,8 @@
     "whd-quick-actions@internal.invalid": {
       "updates": [
         {
-          "version": "0.2.0",
-          "update_link": "https://jackcoates.co.uk/whd-extension/whd-quick-actions-firefox-v0.2.0.xpi",
+          "version": "0.3.0",
+          "update_link": "https://jackcoates.co.uk/whd-extension/whd-quick-actions-firefox-v0.3.0.xpi",
           "applications": {
             "gecko": {
               "strict_min_version": "142.0"
